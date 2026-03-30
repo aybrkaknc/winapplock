@@ -87,8 +87,29 @@
 
     <!-- LockOverlay -->
     <sys:String x:Key="Str_LockedBy">tarafından kilitlendi.</sys:String>
-    <sys:String x:Key="Str_EnterPin">PIN Kodunu Girin</sys:String>
-    <sys:String x:Key="Str_EnterPassword">Şifrenizi Girin</sys:String>
+    <sys:String x:Key="Str_EnterPin">Bu uygulama kilitli. PIN kodunu gir.</sys:String>
+    <sys:String x:Key="Str_EnterPassword">Bu uygulama kilitli. Şifreni gir.</sys:String>
     <sys:String x:Key="Str_Unlock">Kilidi Aç</sys:String>
+    <sys:String x:Key="Str_WrongPassword">Yanlış şifre!</sys:String>
+    <sys:String x:Key="Str_TooManyAttempts">Çok fazla hatalı giriş!</sys:String>
+    <sys:String x:Key="Str_WaitSeconds">{0} saniye beklemelisin.</sys:String>
+    <sys:String x:Key="Str_AttemptsRemaining">{0} deneme hakkın kaldı.</sys:String>
+    <sys:String x:Key="Str_TryAgain">Tekrar deneyebilirsin.</sys:String>
+
+    <!-- MainWindow Code-Behind -->
+    <sys:String x:Key="Str_DialogSelectApp">Kilitlenecek uygulamayı seç</sys:String>
+    <sys:String x:Key="Str_DialogExeFilter">Çalıştırılabilir Dosyalar (*.exe)|*.exe</sys:String>
+    <sys:String x:Key="Str_AlreadyLocked">Bu uygulama zaten kilitli listede!</sys:String>
+    <sys:String x:Key="Str_AddError">Uygulama eklenirken hata:</sys:String>
+    <sys:String x:Key="Str_ToggleDisable">Kilidi devre dışı bırak</sys:String>
+    <sys:String x:Key="Str_ToggleEnable">Kilidi aktifleştir</sys:String>
+    <sys:String x:Key="Str_RemoveLock">Kilidi kaldır</sys:String>
+    <sys:String x:Key="Str_ConfirmRemove">"{0}" uygulamasının kilidini kaldırmak istediğine emin misin?</sys:String>
+    <sys:String x:Key="Str_ConfirmRemoveTitle">Kilidi Kaldır</sys:String>
+    <sys:String x:Key="Str_AllLocked">Tüm kilitli uygulamalar kilitlendi!</sys:String>
+
+    <!-- SettingsView Code-Behind -->
+    <sys:String x:Key="Str_Saved">✓  Kaydedildi!</sys:String>
+    <sys:String x:Key="Str_ChangePasswordSoon">Şifre değiştirme özelliği yakında eklenecek.</sys:String>
 
 </ResourceDictionary>

@@ -24,6 +24,14 @@ public partial class SettingsView : UserControl
         LoadSettings();
     }
 
+    /// <summary>
+    /// ResourceDictionary'den lokalize metin çeker.
+    /// </summary>
+    private static string L(string key, string fallback = "")
+    {
+        return Application.Current.TryFindResource(key)?.ToString() ?? fallback;
+    }
+
     /// <summary>Mevcut ayarları UI kontrollerine yükler.</summary>
     private void LoadSettings()
     {
@@ -54,7 +62,7 @@ public partial class SettingsView : UserControl
         _database.SaveSettings(_settings);
 
         // Kaydedildi bildirimi
-        BtnSaveSettings.Content = "✓  Kaydedildi!";
+        BtnSaveSettings.Content = L("Str_Saved", "✓  Kaydedildi!");
 
         // 2 saniye sonra eski metne dön
         var timer = new System.Windows.Threading.DispatcherTimer
@@ -63,7 +71,7 @@ public partial class SettingsView : UserControl
         };
         timer.Tick += (_, _) =>
         {
-            BtnSaveSettings.Content = "💾  Ayarları Kaydet";
+            BtnSaveSettings.Content = L("Str_BtnSaveSettings", "💾  Ayarları Kaydet");
             timer.Stop();
         };
         timer.Start();
@@ -73,7 +81,7 @@ public partial class SettingsView : UserControl
     private void BtnChangePassword_Click(object sender, RoutedEventArgs e)
     {
         // TODO: Şifre değiştirme dialogu implementasyonu
-        MessageBox.Show("Şifre değiştirme özelliği yakında eklenecek.",
+        MessageBox.Show(L("Str_ChangePasswordSoon", "Şifre değiştirme özelliği yakında eklenecek."),
             "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 

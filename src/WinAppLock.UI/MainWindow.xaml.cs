@@ -24,6 +24,18 @@ public partial class MainWindow : Window
         LoadLockedApps();
     }
 
+    /// <summary>
+    /// ResourceDictionary'den lokalize metin çeker.
+    /// Bulunamazsa fallback değeri döner.
+    /// </summary>
+    /// <param name="key">Sözlükteki x:Key değeri</param>
+    /// <param name="fallback">Anahtar bulunamazsa kullanılacak varsayılan metin</param>
+    /// <returns>Lokalize edilmiş metin</returns>
+    private static string L(string key, string fallback = "")
+    {
+        return Application.Current.TryFindResource(key)?.ToString() ?? fallback;
+    }
+
     // ═══════════════════════════════════════
     // Title Bar Olayları
     // ═══════════════════════════════════════
@@ -84,8 +96,8 @@ public partial class MainWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Kilitlenecek uygulamayı seç",
-            Filter = "Çalıştırılabilir Dosyalar (*.exe)|*.exe",
+            Title = L("Str_DialogSelectApp", "Kilitlenecek uygulamayı seç"),
+            Filter = L("Str_DialogExeFilter", "Çalıştırılabilir Dosyalar (*.exe)|*.exe"),
             Multiselect = false
         };
 
@@ -145,7 +157,7 @@ public partial class MainWindow : Window
             var existingApps = _database.GetAllLockedApps();
             if (existingApps.Any(a => a.Identity.Sha256Hash == identity.Sha256Hash))
             {
-                MessageBox.Show("Bu uygulama zaten kilitli listede!",
+                MessageBox.Show(L("Str_AlreadyLocked", "Bu uygulama zaten kilitli listede!"),
                     "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -183,8 +195,8 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Uygulama eklenirken hata:\n{ex.Message}",
-                "WinAppLock Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"{L("Str_AddError", "Uygulama eklenirken hata:")}\n{ex.Message}",
+                "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -310,7 +322,7 @@ public partial class MainWindow : Window
             Style = (Style)FindResource("ToggleSwitch"),
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(12, 0, 8, 0),
-            ToolTip = app.IsEnabled ? "Kilidi devre dışı bırak" : "Kilidi aktifleştir"
+            ToolTip = app.IsEnabled ? L("Str_ToggleDisable", "Kilidi devre dışı bırak") : L("Str_ToggleEnable", "Kilidi aktifleştir")
         };
         toggle.Tag = app.Id;
         toggle.Checked += (_, _) => ToggleAppLock(app.Id, true);
@@ -322,7 +334,7 @@ public partial class MainWindow : Window
             Content = "🗑",
             Style = (Style)FindResource("BtnIcon"),
             VerticalAlignment = VerticalAlignment.Center,
-            ToolTip = "Kilidi kaldır"
+            ToolTip = L("Str_RemoveLock", "Kilidi kaldır")
         };
         deleteBtn.Tag = app.Id;
         deleteBtn.Click += (_, _) => RemoveApp(app.Id, app.DisplayName);
@@ -371,9 +383,10 @@ public partial class MainWindow : Window
     /// <summary>Uygulamayı kilitli listeden kaldırır (onay ile).</summary>
     private void RemoveApp(int appId, string appName)
     {
+        var confirmMsg = string.Format(L("Str_ConfirmRemove", "\"{0}\" uygulamasının kilidini kaldırmak istediğine emin misin?"), appName);
         var result = MessageBox.Show(
-            $"\"{appName}\" uygulamasının kilidini kaldırmak istediğine emin misin?",
-            "Kilidi Kaldır",
+            confirmMsg,
+            L("Str_ConfirmRemoveTitle", "Kilidi Kaldır"),
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
@@ -394,7 +407,7 @@ public partial class MainWindow : Window
     private void BtnLockAll_Click(object sender, RoutedEventArgs e)
     {
         // TODO: Service'e LockAll mesajı gönder
-        MessageBox.Show("Tüm kilitli uygulamalar kilitlendi!",
+        MessageBox.Show(L("Str_AllLocked", "Tüm kilitli uygulamalar kilitlendi!"),
             "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }

@@ -95,13 +95,13 @@
                         <!-- Menü Öğeleri (Üst) -->
                         <StackPanel DockPanel.Dock="Top" Margin="8,12,8,0">
                             <Button x:Name="BtnNavDashboard"
-                                    Content="📋  Dashboard"
+                                    Content="{DynamicResource Str_Dashboard}"
                                     Style="{StaticResource BtnSecondary}"
                                     HorizontalContentAlignment="Left"
                                     Margin="0,2" Padding="12,10"
                                     Click="BtnNavDashboard_Click" />
                             <Button x:Name="BtnNavSettings"
-                                    Content="⚙️  Ayarlar"
+                                    Content="{DynamicResource Str_Settings}"
                                     Style="{StaticResource BtnSecondary}"
                                     HorizontalContentAlignment="Left"
                                     Margin="0,2" Padding="12,10"
@@ -157,7 +157,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="HeaderTitle" Text="{DynamicResource Str_AppTitle}"
+                            <TextBlock x:Name="HeaderTitle" Text="{DynamicResource Str_LockedApps}"
                                        Foreground="{StaticResource BrushTextPrimary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeXL}"
@@ -217,7 +217,7 @@
                                                Margin="0,8,0,16"
                                                LineHeight="22" />
                                     <Button x:Name="BtnEmptyStateAdd"
-                                            Content="＋  İlk Uygulamayı Ekle"
+                                            Content="{DynamicResource Str_BtnEmptyAdd}"
                                             Style="{StaticResource BtnPrimary}"
                                             HorizontalAlignment="Center"
                                             Click="BtnAddApp_Click" />

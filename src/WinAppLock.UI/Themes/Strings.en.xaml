@@ -87,8 +87,29 @@
 
     <!-- LockOverlay -->
     <sys:String x:Key="Str_LockedBy">is locked by</sys:String>
-    <sys:String x:Key="Str_EnterPin">Enter PIN Code</sys:String>
-    <sys:String x:Key="Str_EnterPassword">Enter Password</sys:String>
+    <sys:String x:Key="Str_EnterPin">This app is locked. Enter your PIN.</sys:String>
+    <sys:String x:Key="Str_EnterPassword">This app is locked. Enter your password.</sys:String>
     <sys:String x:Key="Str_Unlock">Unlock</sys:String>
+    <sys:String x:Key="Str_WrongPassword">Wrong password!</sys:String>
+    <sys:String x:Key="Str_TooManyAttempts">Too many failed attempts!</sys:String>
+    <sys:String x:Key="Str_WaitSeconds">Please wait {0} seconds.</sys:String>
+    <sys:String x:Key="Str_AttemptsRemaining">{0} attempts remaining.</sys:String>
+    <sys:String x:Key="Str_TryAgain">You can try again.</sys:String>
+
+    <!-- MainWindow Code-Behind -->
+    <sys:String x:Key="Str_DialogSelectApp">Select an application to lock</sys:String>
+    <sys:String x:Key="Str_DialogExeFilter">Executable Files (*.exe)|*.exe</sys:String>
+    <sys:String x:Key="Str_AlreadyLocked">This application is already locked!</sys:String>
+    <sys:String x:Key="Str_AddError">Error adding application:</sys:String>
+    <sys:String x:Key="Str_ToggleDisable">Disable lock</sys:String>
+    <sys:String x:Key="Str_ToggleEnable">Enable lock</sys:String>
+    <sys:String x:Key="Str_RemoveLock">Remove lock</sys:String>
+    <sys:String x:Key="Str_ConfirmRemove">Are you sure you want to remove the lock on "{0}"?</sys:String>
+    <sys:String x:Key="Str_ConfirmRemoveTitle">Remove Lock</sys:String>
+    <sys:String x:Key="Str_AllLocked">All locked applications have been locked!</sys:String>
+
+    <!-- SettingsView Code-Behind -->
+    <sys:String x:Key="Str_Saved">✓  Saved!</sys:String>
+    <sys:String x:Key="Str_ChangePasswordSoon">Password change feature will be added soon.</sys:String>
 
 </ResourceDictionary>

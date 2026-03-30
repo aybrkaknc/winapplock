@@ -59,6 +59,14 @@ public partial class LockOverlay : Window
     }
 
     /// <summary>
+    /// ResourceDictionary'den lokalize metin çeker.
+    /// </summary>
+    private static string L(string key, string fallback = "")
+    {
+        return Application.Current.TryFindResource(key)?.ToString() ?? fallback;
+    }
+
+    /// <summary>
     /// Overlay'i belirtilen process için gösterir.
     /// </summary>
     /// <param name="processId">Askıya alınan process ID'si</param>
@@ -306,16 +314,16 @@ public partial class LockOverlay : Window
         {
             // Bekleme süresini başlat
             _cooldownUntil = DateTime.UtcNow.AddSeconds(_settings.CooldownSeconds);
-            OverlayStatusText.Text = $"Çok fazla hatalı giriş!";
-            OverlayAttemptsText.Text = $"{_settings.CooldownSeconds} saniye beklemelisin.";
+            OverlayStatusText.Text = L("Str_TooManyAttempts", "Çok fazla hatalı giriş!");
+            OverlayAttemptsText.Text = string.Format(L("Str_WaitSeconds", "{0} saniye beklemelisin."), _settings.CooldownSeconds);
 
             // Geri sayım başlat
             StartCooldownTimer();
         }
         else
         {
-            OverlayStatusText.Text = "Yanlış şifre!";
-            OverlayAttemptsText.Text = $"{remaining} deneme hakkın kaldı.";
+            OverlayStatusText.Text = L("Str_WrongPassword", "Yanlış şifre!");
+            OverlayAttemptsText.Text = string.Format(L("Str_AttemptsRemaining", "{0} deneme hakkın kaldı."), remaining);
         }
     }
 
@@ -352,12 +360,12 @@ public partial class LockOverlay : Window
                 _cooldownUntil = null;
                 _failedAttempts = 0;
                 OverlayStatusText.Text = string.Empty;
-                OverlayAttemptsText.Text = "Tekrar deneyebilirsin.";
+                OverlayAttemptsText.Text = L("Str_TryAgain", "Tekrar deneyebilirsin.");
                 return;
             }
 
             var remaining = (_cooldownUntil.Value - DateTime.UtcNow).TotalSeconds;
-            OverlayAttemptsText.Text = $"{(int)remaining} saniye beklemelisin.";
+            OverlayAttemptsText.Text = string.Format(L("Str_WaitSeconds", "{0} saniye beklemelisin."), (int)remaining);
         };
 
         timer.Start();
