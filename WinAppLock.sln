@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{333541F4-09F8-4114-B842-A29FD756D699}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinAppLock.Core", "src\WinAppLock.Core\WinAppLock.Core.csproj", "{9BFF65F2-F7E5-43EA-BD6C-061C955864BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinAppLock.Service", "src\WinAppLock.Service\WinAppLock.Service.csproj", "{F2E98712-0F11-4258-88E7-76F8B3CE8BF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinAppLock.UI", "src\WinAppLock.UI\WinAppLock.UI.csproj", "{A5C8DA17-4319-4218-8252-8B1FC1069C32}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BFF65F2-F7E5-43EA-BD6C-061C955864BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BFF65F2-F7E5-43EA-BD6C-061C955864BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BFF65F2-F7E5-43EA-BD6C-061C955864BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BFF65F2-F7E5-43EA-BD6C-061C955864BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E98712-0F11-4258-88E7-76F8B3CE8BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E98712-0F11-4258-88E7-76F8B3CE8BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E98712-0F11-4258-88E7-76F8B3CE8BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E98712-0F11-4258-88E7-76F8B3CE8BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5C8DA17-4319-4218-8252-8B1FC1069C32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5C8DA17-4319-4218-8252-8B1FC1069C32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5C8DA17-4319-4218-8252-8B1FC1069C32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5C8DA17-4319-4218-8252-8B1FC1069C32}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9BFF65F2-F7E5-43EA-BD6C-061C955864BA} = {333541F4-09F8-4114-B842-A29FD756D699}
+		{F2E98712-0F11-4258-88E7-76F8B3CE8BF0} = {333541F4-09F8-4114-B842-A29FD756D699}
+		{A5C8DA17-4319-4218-8252-8B1FC1069C32} = {333541F4-09F8-4114-B842-A29FD756D699}
+	EndGlobalSection
+EndGlobal
