@@ -214,7 +214,7 @@ public partial class MainWindow : Window
             : Visibility.Collapsed;
 
         // Başlık alt metnini güncelle
-        HeaderSubtitle.Text = $"{apps.Count} uygulama korunuyor";
+        RunAppCount.Text = apps.Count.ToString();
 
         // Kartları oluştur
         foreach (var app in apps)

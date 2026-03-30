@@ -203,7 +203,7 @@
                                  Margin="0,0,0,12"
                                  KeyDown="OverlayPasswordBox_KeyDown" />
                     <Button x:Name="BtnPasswordSubmit"
-                            Content="Kilidi Aç"
+                            Content="{DynamicResource Str_Unlock}"
                             Style="{StaticResource BtnPrimary}"
                             HorizontalAlignment="Stretch"
                             Click="BtnPasswordSubmit_Click" />

@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Global -->
+    <sys:String x:Key="Str_AppTitle">WinAppLock</sys:String>
+    <sys:String x:Key="Str_BtnBack">← Back</sys:String>
+    <sys:String x:Key="Str_BtnSkip">Skip</sys:String>
+    <sys:String x:Key="Str_BtnNext">Next →</sys:String>
+    <sys:String x:Key="Str_BtnComplete">Complete ✓</sys:String>
+    
+    <!-- SetupWizard -->
+    <sys:String x:Key="Str_SetupTitle">WinAppLock Setup</sys:String>
+    <sys:String x:Key="Str_SetupWelcomeTitle">Welcome to WinAppLock!</sys:String>
+    <sys:String x:Key="Str_SetupWelcomeDesc">Securely protect your applications.&#x0a;Finishing the setup will only take a few seconds.</sys:String>
+    <sys:String x:Key="Str_Language">Language / Dil</sys:String>
+    <sys:String x:Key="Str_LangTR">  Türkçe</sys:String>
+    <sys:String x:Key="Str_LangEN">  English</sys:String>
+
+    <sys:String x:Key="Str_LockMethod">Lock Method</sys:String>
+    <sys:String x:Key="Str_LockMethodDesc">Which method would you like to use to unlock your apps?</sys:String>
+    <sys:String x:Key="Str_PinCode">🔢  PIN Code</sys:String>
+    <sys:String x:Key="Str_PinCodeDesc">4-8 digit numeric code. Fast and practical.</sys:String>
+    <sys:String x:Key="Str_Password">🔑  Alphanumeric Password</sys:String>
+    <sys:String x:Key="Str_PasswordDesc">Letters, numbers and special characters. More secure.</sys:String>
+    <sys:String x:Key="Str_PinLength">PIN Length</sys:String>
+
+    <sys:String x:Key="Str_MasterSetTitle">Set Master PIN/Password</sys:String>
+    <sys:String x:Key="Str_MasterSetDesc">You will use this code to unlock every protected application.</sys:String>
+    <sys:String x:Key="Str_SetupPasswordTitle">Password</sys:String>
+    <sys:String x:Key="Str_SetupPasswordConfirm">Confirm Password</sys:String>
+
+    <sys:String x:Key="Str_RecoveryKeyTitle">🔑 Your Recovery Key</sys:String>
+    <sys:String x:Key="Str_RecoveryKeyDesc">If you forget your password, you can reset it with this key.&#x0a;Save this key somewhere secure! It won't be shown again.</sys:String>
+    <sys:String x:Key="Str_BtnCopy">📋  Copy to Clipboard</sys:String>
+
+    <sys:String x:Key="Str_SecurityQuestionTitle">Security Question (Optional)</sys:String>
+    <sys:String x:Key="Str_SecurityQuestionDesc">An extra layer of security for password recovery.&#x0a;You can skip this step if you want.</sys:String>
+    <sys:String x:Key="Str_SecurityQuestion">Security Question</sys:String>
+    <sys:String x:Key="Str_SecurityAnswer">Answer</sys:String>
+
+    <!-- MainWindow -->
+    <sys:String x:Key="Str_Dashboard">📋  Dashboard</sys:String>
+    <sys:String x:Key="Str_Settings">⚙️  Settings</sys:String>
+    <sys:String x:Key="Str_ServiceActive">Service Active</sys:String>
+    <sys:String x:Key="Str_LockAll">🔐  Lock All</sys:String>
+
+    <!-- Dashboard -->
+    <sys:String x:Key="Str_LockedApps">Locked Apps</sys:String>
+    <sys:String x:Key="Str_AppCount">apps protected</sys:String>
+    <sys:String x:Key="Str_BtnAddApp">＋  Add App</sys:String>
+    
+    <sys:String x:Key="Str_EmptyStateTitle">No locked apps yet</sys:String>
+    <sys:String x:Key="Str_EmptyStateDesc">To protect an application, click the 'Add App' button above&#x0a;or drag and drop an .exe file here.</sys:String>
+    <sys:String x:Key="Str_BtnEmptyAdd">＋  Add First App</sys:String>
+
+    <!-- SettingsView -->
+    <sys:String x:Key="Str_SettingsTitle">⚙️  Settings</sys:String>
+    <sys:String x:Key="Str_Security">SECURITY</sys:String>
+    
+    <sys:String x:Key="Str_ChangePasswordTitle">Change Password</sys:String>
+    <sys:String x:Key="Str_ChangePasswordDesc">Change your master password or PIN</sys:String>
+    <sys:String x:Key="Str_BtnChange">Change</sys:String>
+    
+    <sys:String x:Key="Str_MaxAttemptsTitle">Failed Attempt Limit</sys:String>
+    <sys:String x:Key="Str_MaxAttemptsDesc">Apply temporary block when limit is reached</sys:String>
+    <sys:String x:Key="Str_LimitCount"> attempts</sys:String>
+    
+    <sys:String x:Key="Str_CooldownTitle">Cooldown Time</sys:String>
+    <sys:String x:Key="Str_CooldownDesc">How many seconds to wait after limit is reached</sys:String>
+    <sys:String x:Key="Str_Seconds"> sec</sys:String>
+
+    <sys:String x:Key="Str_UiTimeoutTitle">UI Timeout</sys:String>
+    <sys:String x:Key="Str_UiTimeoutDesc">Ask for password again when idle</sys:String>
+
+    <sys:String x:Key="Str_General">GENERAL</sys:String>
+    <sys:String x:Key="Str_SoundEffectsTitle">Sound Effects</sys:String>
+    <sys:String x:Key="Str_SoundEffectsDesc">Correct/Wrong input sound</sys:String>
+
+    <sys:String x:Key="Str_AutostartTitle">Start with Windows</sys:String>
+    <sys:String x:Key="Str_AutostartDesc">Start automatically when computer boots</sys:String>
+    
+    <sys:String x:Key="Str_LanguageDesc">Change interface language</sys:String>
+
+    <sys:String x:Key="Str_About">ABOUT</sys:String>
+    <sys:String x:Key="Str_BtnSaveSettings">💾  Save Settings</sys:String>
+
+    <!-- LockOverlay -->
+    <sys:String x:Key="Str_LockedBy">is locked by</sys:String>
+    <sys:String x:Key="Str_EnterPin">Enter PIN Code</sys:String>
+    <sys:String x:Key="Str_EnterPassword">Enter Password</sys:String>
+    <sys:String x:Key="Str_Unlock">Unlock</sys:String>
+
+</ResourceDictionary>

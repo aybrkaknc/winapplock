@@ -42,10 +42,14 @@ public partial class App : Application
 
         base.OnStartup(e);
 
-        // İlk kurulum yapılmış mı kontrol et
+        // Ayarları yükle ve dili ayarla
         var database = new AppDatabase();
         var settings = database.GetSettings();
 
+        // Kayıtlı olan dili arayüze uygula
+        LocalizationManager.LoadLanguageFromSettings();
+
+        // İlk kurulum yapılmış mı kontrol et
         if (!settings.SetupCompleted)
         {
             // İlk kurulum sihirbazını göster

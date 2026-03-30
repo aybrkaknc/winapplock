@@ -26,6 +26,11 @@ public partial class SetupWizard : Window
     public SetupWizard()
     {
         InitializeComponent();
+        
+        // Dil butonlarının olaylarını bağla
+        RadioLangTR.Checked += (s, e) => LocalizationManager.ApplyLanguage("tr");
+        RadioLangEN.Checked += (s, e) => LocalizationManager.ApplyLanguage("en");
+
         _database = new AppDatabase();
         UpdateStepUI();
     }

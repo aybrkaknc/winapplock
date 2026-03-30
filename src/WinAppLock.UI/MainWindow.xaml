@@ -122,7 +122,7 @@
                                              Margin="0,0,8,0"
                                              VerticalAlignment="Center" />
                                     <TextBlock x:Name="ServiceStatusText"
-                                               Text="Servis Aktif"
+                                               Text="{DynamicResource Str_ServiceActive}"
                                                Foreground="{StaticResource BrushTextSecondary}"
                                                FontSize="{StaticResource FontSizeS}" />
                                 </StackPanel>
@@ -130,11 +130,12 @@
 
                             <!-- Tümünü Kilitle Butonu -->
                             <Button x:Name="BtnLockAll"
-                                    Content="🔐  Tümünü Kilitle"
                                     Style="{StaticResource BtnPrimary}"
                                     HorizontalContentAlignment="Center"
                                     Click="BtnLockAll_Click"
-                                    ToolTip="Ctrl+Alt+L" />
+                                    ToolTip="Ctrl+Alt+L">
+                                <TextBlock Text="{DynamicResource Str_LockAll}" />
+                            </Button>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -156,20 +157,24 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="HeaderTitle" Text="Kilitli Uygulamalar"
+                            <TextBlock x:Name="HeaderTitle" Text="{DynamicResource Str_AppTitle}"
                                        Foreground="{StaticResource BrushTextPrimary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeXL}"
                                        FontWeight="Bold" />
-                            <TextBlock x:Name="HeaderSubtitle" Text="0 uygulama korunuyor"
+                            <TextBlock x:Name="HeaderSubtitle"
                                        Foreground="{StaticResource BrushTextSecondary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeS}"
-                                       Margin="0,4,0,0" />
+                                       Margin="0,4,0,0">
+                                <Run x:Name="RunAppCount" Text="0" Foreground="{StaticResource BrushAccentPrimary}"/>
+                                <Run Text=" "/>
+                                <Run Text="{DynamicResource Str_AppCount}"/>
+                            </TextBlock>
                         </StackPanel>
 
                         <Button x:Name="BtnAddApp" Grid.Column="1"
-                                Content="＋  Uygulama Ekle"
+                                Content="{DynamicResource Str_BtnAddApp}"
                                 Style="{StaticResource BtnPrimary}"
                                 Click="BtnAddApp_Click"
                                 ToolTip="Yeni bir uygulamayı kilitle" />
@@ -197,14 +202,14 @@
                                                HorizontalAlignment="Center"
                                                Margin="0,0,0,16" />
                                     <TextBlock x:Name="EmptyStateTitle"
-                                               Text="Henüz kilitli uygulama yok"
+                                               Text="{DynamicResource Str_EmptyStateTitle}"
                                                Foreground="{StaticResource BrushTextPrimary}"
                                                FontFamily="{StaticResource FontPrimary}"
                                                FontSize="{StaticResource FontSizeLG}"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Center" />
                                     <TextBlock x:Name="EmptyStateDescription"
-                                               Text="Korumak istediğin uygulamayı eklemek için&#x0a;yukarıdaki 'Uygulama Ekle' butonuna tıkla&#x0a;veya bir .exe dosyasını buraya sürükle-bırak."
+                                               Text="{DynamicResource Str_EmptyStateDesc}"
                                                Foreground="{StaticResource BrushTextSecondary}"
                                                FontFamily="{StaticResource FontPrimary}"
                                                FontSize="{StaticResource FontSizeMD}"

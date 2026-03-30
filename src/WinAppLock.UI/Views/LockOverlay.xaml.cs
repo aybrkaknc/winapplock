@@ -105,19 +105,18 @@ public partial class LockOverlay : Window
             OverlayAppIcon.Visibility = Visibility.Collapsed;
         }
 
-        // PIN veya Şifre modunu göster
         if (_settings.AuthMethod == AuthMethod.Pin)
         {
             PinInputArea.Visibility = Visibility.Visible;
             PasswordInputArea.Visibility = Visibility.Collapsed;
-            OverlayPromptText.Text = "Bu uygulama kilitli. PIN kodunu gir.";
+            OverlayPromptText.Text = Application.Current.TryFindResource("Str_EnterPin")?.ToString() ?? "Bu uygulama kilitli. PIN kodunu gir.";
             InitPinDots();
         }
         else
         {
             PinInputArea.Visibility = Visibility.Collapsed;
             PasswordInputArea.Visibility = Visibility.Visible;
-            OverlayPromptText.Text = "Bu uygulama kilitli. Şifreni gir.";
+            OverlayPromptText.Text = Application.Current.TryFindResource("Str_EnterPassword")?.ToString() ?? "Bu uygulama kilitli. Şifreni gir.";
             OverlayPasswordBox.Password = string.Empty;
         }
 

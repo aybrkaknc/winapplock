@@ -1,7 +1,7 @@
 <Window x:Class="WinAppLock.UI.Views.SetupWizard"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WinAppLock - İlk Kurulum"
+        Title="{DynamicResource Str_SetupTitle}"
         Width="520" Height="580"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -40,7 +40,7 @@
             <Border Grid.Row="0" Background="{StaticResource BrushBackgroundDark}"
                     Padding="24,16" MouseLeftButtonDown="WizardHeader_MouseLeftButtonDown">
                 <StackPanel>
-                    <TextBlock x:Name="WizardTitle" Text="🔐 WinAppLock Kurulum"
+                    <TextBlock x:Name="WizardTitle" Text="{DynamicResource Str_SetupTitle}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeXL}"
@@ -70,31 +70,31 @@
                 <StackPanel x:Name="Step1Welcome" Visibility="Visible">
                     <TextBlock Text="🛡️" FontSize="48" HorizontalAlignment="Center"
                                Margin="0,8,0,16" />
-                    <TextBlock Text="WinAppLock'a Hoş Geldin!"
+                    <TextBlock Text="{DynamicResource Str_SetupWelcomeTitle}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeXXL}"
                                FontWeight="Bold" HorizontalAlignment="Center" />
-                    <TextBlock Text="Uygulamalarını güvenle koru.&#x0a;Kurulumu tamamlamak birkaç saniye sürecek."
+                    <TextBlock Text="{DynamicResource Str_SetupWelcomeDesc}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeMD}"
                                TextAlignment="Center" Margin="0,12,0,32"
                                LineHeight="22" />
 
-                    <TextBlock Text="Dil / Language"
+                    <TextBlock Text="{DynamicResource Str_Language}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeMD}"
                                FontWeight="SemiBold" Margin="0,0,0,8" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <RadioButton x:Name="RadioLangTR" Content="  Türkçe"
+                        <RadioButton x:Name="RadioLangTR" Content="{DynamicResource Str_LangTR}"
                                      Foreground="{StaticResource BrushTextPrimary}"
                                      FontFamily="{StaticResource FontPrimary}"
                                      FontSize="{StaticResource FontSizeMD}"
                                      IsChecked="True" Margin="0,0,24,0"
                                      VerticalContentAlignment="Center" />
-                        <RadioButton x:Name="RadioLangEN" Content="  English"
+                        <RadioButton x:Name="RadioLangEN" Content="{DynamicResource Str_LangEN}"
                                      Foreground="{StaticResource BrushTextPrimary}"
                                      FontFamily="{StaticResource FontPrimary}"
                                      FontSize="{StaticResource FontSizeMD}"
@@ -104,12 +104,12 @@
 
                 <!-- ═══ ADIM 2: Doğrulama Yöntemi ═══ -->
                 <StackPanel x:Name="Step2AuthMethod" Visibility="Collapsed">
-                    <TextBlock Text="Kilit Yöntemi"
+                    <TextBlock Text="{DynamicResource Str_LockMethod}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeXL}"
                                FontWeight="Bold" Margin="0,0,0,8" />
-                    <TextBlock Text="Uygulamalarını açmak için hangi yöntemi kullanmak istersin?"
+                    <TextBlock Text="{DynamicResource Str_LockMethodDesc}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeMD}"
@@ -120,12 +120,12 @@
                             Margin="0,0,0,12" Cursor="Hand"
                             MouseLeftButtonDown="CardAuthPin_Click">
                         <StackPanel>
-                            <TextBlock Text="🔢  PIN Kodu"
+                            <TextBlock Text="{DynamicResource Str_PinCode}"
                                        Foreground="{StaticResource BrushTextPrimary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeLG}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="4-8 haneli sayısal kod. Hızlı ve pratik."
+                            <TextBlock Text="{DynamicResource Str_PinCodeDesc}"
                                        Foreground="{StaticResource BrushTextSecondary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeS}"
@@ -138,12 +138,12 @@
                             Cursor="Hand"
                             MouseLeftButtonDown="CardAuthPassword_Click">
                         <StackPanel>
-                            <TextBlock Text="🔑  Alfanümerik Şifre"
+                            <TextBlock Text="{DynamicResource Str_Password}"
                                        Foreground="{StaticResource BrushTextPrimary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeLG}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Harf, rakam ve özel karakter. Daha güvenli."
+                            <TextBlock Text="{DynamicResource Str_PasswordDesc}"
                                        Foreground="{StaticResource BrushTextSecondary}"
                                        FontFamily="{StaticResource FontPrimary}"
                                        FontSize="{StaticResource FontSizeS}"
@@ -154,7 +154,7 @@
                     <!-- PIN Uzunluk Seçici (PIN seçildiğinde görünür) -->
                     <StackPanel x:Name="PinLengthSelector" Visibility="Collapsed"
                                 Margin="0,16,0,0">
-                        <TextBlock Text="PIN Uzunluğu"
+                        <TextBlock Text="{DynamicResource Str_PinLength}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontFamily="{StaticResource FontPrimary}"
                                    FontSize="{StaticResource FontSizeMD}"
@@ -187,26 +187,26 @@
 
                 <!-- ═══ ADIM 3: Şifre/PIN Belirleme ═══ -->
                 <StackPanel x:Name="Step3SetPassword" Visibility="Collapsed">
-                    <TextBlock x:Name="Step3Title" Text="Master PIN Belirle"
+                    <TextBlock x:Name="Step3Title" Text="{DynamicResource Str_MasterSetTitle}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeXL}"
                                FontWeight="Bold" Margin="0,0,0,8" />
                     <TextBlock x:Name="Step3Description"
-                               Text="Bu kodu her kilitli uygulamayı açmak için kullanacaksın."
+                               Text="{DynamicResource Str_MasterSetDesc}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeMD}"
                                Margin="0,0,0,24" />
 
-                    <TextBlock Text="Şifre"
+                    <TextBlock Text="{DynamicResource Str_SetupPasswordTitle}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontSize="{StaticResource FontSizeS}" Margin="0,0,0,4" />
                     <PasswordBox x:Name="SetupPasswordBox1"
                                  Style="{StaticResource InputPassword}"
                                  Margin="0,0,0,12" />
 
-                    <TextBlock Text="Şifre Tekrar"
+                    <TextBlock Text="{DynamicResource Str_SetupPasswordConfirm}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontSize="{StaticResource FontSizeS}" Margin="0,0,0,4" />
                     <PasswordBox x:Name="SetupPasswordBox2"
@@ -222,12 +222,12 @@
 
                 <!-- ═══ ADIM 4: Recovery Key ═══ -->
                 <StackPanel x:Name="Step4RecoveryKey" Visibility="Collapsed">
-                    <TextBlock Text="🔑 Kurtarma Anahtarın"
+                    <TextBlock Text="{DynamicResource Str_RecoveryKeyTitle}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeXL}"
                                FontWeight="Bold" Margin="0,0,0,8" />
-                    <TextBlock Text="Şifreni unutursan bu anahtarla sıfırlayabilirsin.&#x0a;Bu anahtarı güvenli bir yere kaydet! Bir daha gösterilmeyecek."
+                    <TextBlock Text="{DynamicResource Str_RecoveryKeyDesc}"
                                Foreground="{StaticResource BrushStatusWarning}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeMD}"
@@ -248,7 +248,7 @@
                     </Border>
 
                     <Button x:Name="BtnCopyRecoveryKey"
-                            Content="📋  Panoya Kopyala"
+                            Content="{DynamicResource Str_BtnCopy}"
                             Style="{StaticResource BtnSecondary}"
                             HorizontalAlignment="Center"
                             Click="BtnCopyRecoveryKey_Click" />
@@ -256,25 +256,25 @@
 
                 <!-- ═══ ADIM 5: Güvenlik Sorusu (Opsiyonel) ═══ -->
                 <StackPanel x:Name="Step5SecurityQuestion" Visibility="Collapsed">
-                    <TextBlock Text="Güvenlik Sorusu (Opsiyonel)"
+                    <TextBlock Text="{DynamicResource Str_SecurityQuestionTitle}"
                                Foreground="{StaticResource BrushTextPrimary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeXL}"
                                FontWeight="Bold" Margin="0,0,0,8" />
-                    <TextBlock Text="Şifre kurtarma için ek bir güvenlik katmanı.&#x0a;İstersen bu adımı atlayabilirsin."
+                    <TextBlock Text="{DynamicResource Str_SecurityQuestionDesc}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontFamily="{StaticResource FontPrimary}"
                                FontSize="{StaticResource FontSizeMD}"
                                Margin="0,0,0,20" LineHeight="22" />
 
-                    <TextBlock Text="Güvenlik Sorusu"
+                    <TextBlock Text="{DynamicResource Str_SecurityQuestion}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontSize="{StaticResource FontSizeS}" Margin="0,0,0,4" />
                     <TextBox x:Name="SecurityQuestionBox"
                              Style="{StaticResource InputText}"
                              Margin="0,0,0,12" />
 
-                    <TextBlock Text="Cevap"
+                    <TextBlock Text="{DynamicResource Str_SecurityAnswer}"
                                Foreground="{StaticResource BrushTextSecondary}"
                                FontSize="{StaticResource FontSizeS}" Margin="0,0,0,4" />
                     <TextBox x:Name="SecurityAnswerBox"
@@ -293,21 +293,21 @@
                     </Grid.ColumnDefinitions>
 
                     <Button x:Name="BtnWizardBack" Grid.Column="0"
-                            Content="← Geri"
+                            Content="{DynamicResource Str_BtnBack}"
                             Style="{StaticResource BtnSecondary}"
                             HorizontalAlignment="Left"
                             Click="BtnWizardBack_Click"
                             Visibility="Collapsed" />
 
                     <Button x:Name="BtnWizardSkip" Grid.Column="1"
-                            Content="Atla"
+                            Content="{DynamicResource Str_BtnSkip}"
                             Style="{StaticResource BtnSecondary}"
                             Margin="0,0,8,0"
                             Click="BtnWizardSkip_Click"
                             Visibility="Collapsed" />
 
                     <Button x:Name="BtnWizardNext" Grid.Column="2"
-                            Content="Devam →"
+                            Content="{DynamicResource Str_BtnNext}"
                             Style="{StaticResource BtnPrimary}"
                             HorizontalAlignment="Right"
                             Click="BtnWizardNext_Click" />

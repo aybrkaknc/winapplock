@@ -36,3 +36,7 @@ global using FontFamily = System.Windows.Media.FontFamily;
 // Diğer
 global using Clipboard = System.Windows.Clipboard;
 global using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+
+// WinAppLock Servisleri
+global using LocalizationManager = WinAppLock.UI.Services.LocalizationManager;
+

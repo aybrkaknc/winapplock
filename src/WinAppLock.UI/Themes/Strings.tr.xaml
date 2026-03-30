@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Global -->
+    <sys:String x:Key="Str_AppTitle">WinAppLock</sys:String>
+    <sys:String x:Key="Str_BtnBack">← Geri</sys:String>
+    <sys:String x:Key="Str_BtnSkip">Atla</sys:String>
+    <sys:String x:Key="Str_BtnNext">Devam →</sys:String>
+    <sys:String x:Key="Str_BtnComplete">Tamamla ✓</sys:String>
+    
+    <!-- SetupWizard -->
+    <sys:String x:Key="Str_SetupTitle">WinAppLock Kurulum</sys:String>
+    <sys:String x:Key="Str_SetupWelcomeTitle">WinAppLock'a Hoş Geldin!</sys:String>
+    <sys:String x:Key="Str_SetupWelcomeDesc">Uygulamalarını güvenle koru.&#x0a;Kurulumu tamamlamak birkaç saniye sürecek.</sys:String>
+    <sys:String x:Key="Str_Language">Dil / Language</sys:String>
+    <sys:String x:Key="Str_LangTR">  Türkçe</sys:String>
+    <sys:String x:Key="Str_LangEN">  English</sys:String>
+
+    <sys:String x:Key="Str_LockMethod">Kilit Yöntemi</sys:String>
+    <sys:String x:Key="Str_LockMethodDesc">Uygulamalarını açmak için hangi yöntemi kullanmak istersin?</sys:String>
+    <sys:String x:Key="Str_PinCode">🔢  PIN Kodu</sys:String>
+    <sys:String x:Key="Str_PinCodeDesc">4-8 haneli sayısal kod. Hızlı ve pratik.</sys:String>
+    <sys:String x:Key="Str_Password">🔑  Alfanümerik Şifre</sys:String>
+    <sys:String x:Key="Str_PasswordDesc">Harf, rakam ve özel karakter. Daha güvenli.</sys:String>
+    <sys:String x:Key="Str_PinLength">PIN Uzunluğu</sys:String>
+
+    <sys:String x:Key="Str_MasterSetTitle">Master PIN/Şifre Belirle</sys:String>
+    <sys:String x:Key="Str_MasterSetDesc">Bu kodu her kilitli uygulamayı açmak için kullanacaksın.</sys:String>
+    <sys:String x:Key="Str_SetupPasswordTitle">Şifre</sys:String>
+    <sys:String x:Key="Str_SetupPasswordConfirm">Şifre Tekrar</sys:String>
+
+    <sys:String x:Key="Str_RecoveryKeyTitle">🔑 Kurtarma Anahtarın</sys:String>
+    <sys:String x:Key="Str_RecoveryKeyDesc">Şifreni unutursan bu anahtarla sıfırlayabilirsin.&#x0a;Bu anahtarı güvenli bir yere kaydet! Bir daha gösterilmeyecek.</sys:String>
+    <sys:String x:Key="Str_BtnCopy">📋  Panoya Kopyala</sys:String>
+
+    <sys:String x:Key="Str_SecurityQuestionTitle">Güvenlik Sorusu (Opsiyonel)</sys:String>
+    <sys:String x:Key="Str_SecurityQuestionDesc">Şifre kurtarma için ek bir güvenlik katmanı.&#x0a;İstersen bu adımı atlayabilirsin.</sys:String>
+    <sys:String x:Key="Str_SecurityQuestion">Güvenlik Sorusu</sys:String>
+    <sys:String x:Key="Str_SecurityAnswer">Cevap</sys:String>
+
+    <!-- MainWindow -->
+    <sys:String x:Key="Str_Dashboard">📋  Dashboard</sys:String>
+    <sys:String x:Key="Str_Settings">⚙️  Ayarlar</sys:String>
+    <sys:String x:Key="Str_ServiceActive">Servis Aktif</sys:String>
+    <sys:String x:Key="Str_LockAll">🔐  Tümünü Kilitle</sys:String>
+
+    <!-- Dashboard -->
+    <sys:String x:Key="Str_LockedApps">Kilitli Uygulamalar</sys:String>
+    <sys:String x:Key="Str_AppCount">uygulama korunuyor</sys:String> <!-- "0 uygulama korunuyor" stringini splitli atacağız -->
+    <sys:String x:Key="Str_BtnAddApp">＋  Uygulama Ekle</sys:String>
+    
+    <sys:String x:Key="Str_EmptyStateTitle">Henüz kilitli uygulama yok</sys:String>
+    <sys:String x:Key="Str_EmptyStateDesc">Korumak istediğin uygulamayı eklemek için&#x0a;yukarıdaki 'Uygulama Ekle' butonuna tıkla&#x0a;veya bir .exe dosyasını buraya sürükle-bırak.</sys:String>
+    <sys:String x:Key="Str_BtnEmptyAdd">＋  İlk Uygulamayı Ekle</sys:String>
+
+    <!-- SettingsView -->
+    <sys:String x:Key="Str_SettingsTitle">⚙️  Ayarlar</sys:String>
+    <sys:String x:Key="Str_Security">GÜVENLİK</sys:String>
+    
+    <sys:String x:Key="Str_ChangePasswordTitle">Şifre Değiştir</sys:String>
+    <sys:String x:Key="Str_ChangePasswordDesc">Master şifreni veya PIN'ini değiştir</sys:String>
+    <sys:String x:Key="Str_BtnChange">Değiştir</sys:String>
+    
+    <sys:String x:Key="Str_MaxAttemptsTitle">Hatalı Giriş Limiti</sys:String>
+    <sys:String x:Key="Str_MaxAttemptsDesc">Limiti aşınca geçici bloklama uygula</sys:String>
+    <sys:String x:Key="Str_LimitCount"> deneme</sys:String>
+    
+    <sys:String x:Key="Str_CooldownTitle">Bekleme Süresi</sys:String>
+    <sys:String x:Key="Str_CooldownDesc">Limit aşıldığında kaç saniye beklenecek</sys:String>
+    <sys:String x:Key="Str_Seconds"> sn</sys:String>
+
+    <sys:String x:Key="Str_UiTimeoutTitle">UI Zaman Aşımı</sys:String>
+    <sys:String x:Key="Str_UiTimeoutDesc">İşlem yapılmadığında tekrar şifre sor</sys:String>
+
+    <sys:String x:Key="Str_General">GENEL</sys:String>
+    <sys:String x:Key="Str_SoundEffectsTitle">Ses Efektleri</sys:String>
+    <sys:String x:Key="Str_SoundEffectsDesc">Doğru/yanlış giriş sesi</sys:String>
+
+    <sys:String x:Key="Str_AutostartTitle">Windows Başlangıcında Çalış</sys:String>
+    <sys:String x:Key="Str_AutostartDesc">Bilgisayar açıldığında otomatik başlat</sys:String>
+    
+    <sys:String x:Key="Str_LanguageDesc">Arayüz dilini değiştir</sys:String>
+
+    <sys:String x:Key="Str_About">HAKKINDA</sys:String>
+    <sys:String x:Key="Str_BtnSaveSettings">💾  Ayarları Kaydet</sys:String>
+
+    <!-- LockOverlay -->
+    <sys:String x:Key="Str_LockedBy">tarafından kilitlendi.</sys:String>
+    <sys:String x:Key="Str_EnterPin">PIN Kodunu Girin</sys:String>
+    <sys:String x:Key="Str_EnterPassword">Şifrenizi Girin</sys:String>
+    <sys:String x:Key="Str_Unlock">Kilidi Aç</sys:String>
+
+</ResourceDictionary>

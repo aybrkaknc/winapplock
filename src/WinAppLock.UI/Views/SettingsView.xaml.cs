@@ -77,6 +77,13 @@ public partial class SettingsView : UserControl
             "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
+    private void ComboLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ComboLanguage == null || !IsLoaded) return;
+        var lang = ComboLanguage.SelectedIndex == 1 ? "en" : "tr";
+        LocalizationManager.ApplyLanguage(lang);
+    }
+
     /// <summary>GitHub bağlantısını varsayılan tarayıcıda açar.</summary>
     private void GithubLink_Click(object sender, MouseButtonEventArgs e)
     {

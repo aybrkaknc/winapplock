@@ -15,14 +15,14 @@
         <StackPanel Margin="0,0,0,24">
 
             <!-- ─── Başlık ─── -->
-            <TextBlock x:Name="SettingsTitle" Text="⚙️  Ayarlar"
+            <TextBlock x:Name="SettingsTitle" Text="{DynamicResource Str_SettingsTitle}"
                        Foreground="{StaticResource BrushTextPrimary}"
                        FontFamily="{StaticResource FontPrimary}"
                        FontSize="{StaticResource FontSizeXL}"
                        FontWeight="Bold" Margin="0,0,0,24" />
 
             <!-- ═══ Güvenlik Ayarları ═══ -->
-            <TextBlock Text="GÜVENLİK"
+            <TextBlock Text="{DynamicResource Str_Security}"
                        Foreground="{StaticResource BrushTextSecondary}"
                        FontFamily="{StaticResource FontPrimary}"
                        FontSize="{StaticResource FontSizeS}"
@@ -35,15 +35,15 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Şifre Değiştir"
+                        <TextBlock Text="{DynamicResource Str_ChangePasswordTitle}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="Master şifreni veya PIN'ini değiştir"
+                        <TextBlock Text="{DynamicResource Str_ChangePasswordDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
                     <Button x:Name="BtnChangePassword" Grid.Column="1"
-                            Content="Değiştir"
+                            Content="{DynamicResource Str_BtnChange}"
                             Style="{StaticResource BtnSecondary}"
                             VerticalAlignment="Center"
                             Click="BtnChangePassword_Click" />
@@ -57,10 +57,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Hatalı Giriş Limiti"
+                        <TextBlock Text="{DynamicResource Str_MaxAttemptsTitle}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="Limiti aşınca geçici bloklama uygula"
+                        <TextBlock Text="{DynamicResource Str_MaxAttemptsDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
@@ -69,7 +69,7 @@
                                  Style="{StaticResource InputText}"
                                  Width="50" Text="5"
                                  TextAlignment="Center" />
-                        <TextBlock Text=" deneme"
+                        <TextBlock Text="{DynamicResource Str_LimitCount}"
                                    Foreground="{StaticResource BrushTextSecondary}"
                                    FontSize="{StaticResource FontSizeS}"
                                    VerticalAlignment="Center" Margin="4,0,0,0" />
@@ -84,10 +84,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Bekleme Süresi"
+                        <TextBlock Text="{DynamicResource Str_CooldownTitle}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="Limit aşıldığında kaç saniye beklenecek"
+                        <TextBlock Text="{DynamicResource Str_CooldownDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
@@ -96,7 +96,7 @@
                                  Style="{StaticResource InputText}"
                                  Width="50" Text="30"
                                  TextAlignment="Center" />
-                        <TextBlock Text=" sn"
+                        <TextBlock Text="{DynamicResource Str_Seconds}"
                                    Foreground="{StaticResource BrushTextSecondary}"
                                    FontSize="{StaticResource FontSizeS}"
                                    VerticalAlignment="Center" Margin="4,0,0,0" />
@@ -111,10 +111,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="UI Zaman Aşımı"
+                        <TextBlock Text="{DynamicResource Str_UiTimeoutTitle}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="İşlem yapılmadığında tekrar şifre sor"
+                        <TextBlock Text="{DynamicResource Str_UiTimeoutDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
@@ -123,7 +123,7 @@
                                  Style="{StaticResource InputText}"
                                  Width="50" Text="30"
                                  TextAlignment="Center" />
-                        <TextBlock Text=" sn"
+                        <TextBlock Text="{DynamicResource Str_Seconds}"
                                    Foreground="{StaticResource BrushTextSecondary}"
                                    FontSize="{StaticResource FontSizeS}"
                                    VerticalAlignment="Center" Margin="4,0,0,0" />
@@ -132,7 +132,7 @@
             </Border>
 
             <!-- ═══ Genel Ayarlar ═══ -->
-            <TextBlock Text="Genel"
+            <TextBlock Text="{DynamicResource Str_General}"
                        Foreground="{StaticResource BrushTextSecondary}"
                        FontFamily="{StaticResource FontPrimary}"
                        FontSize="{StaticResource FontSizeS}"
@@ -145,10 +145,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Ses Efektleri"
+                        <TextBlock Text="{DynamicResource Str_SoundEffectsTitle}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="Doğru/yanlış giriş sesi"
+                        <TextBlock Text="{DynamicResource Str_SoundEffectsDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
@@ -166,10 +166,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Windows Başlangıcında Çalış"
+                        <TextBlock Text="{DynamicResource Str_AutostartTitle}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="Bilgisayar açıldığında otomatik başlat"
+                        <TextBlock Text="{DynamicResource Str_AutostartDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
@@ -187,16 +187,16 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Dil / Language"
+                        <TextBlock Text="{DynamicResource Str_Language}"
                                    Foreground="{StaticResource BrushTextPrimary}"
                                    FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="Arayüz dilini değiştir"
+                        <TextBlock Text="{DynamicResource Str_LanguageDesc}"
                                    Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
                     </StackPanel>
                     <ComboBox x:Name="ComboLanguage" Grid.Column="1"
                               Width="120" VerticalAlignment="Center"
-                              SelectedIndex="0">
+                              SelectedIndex="0" SelectionChanged="ComboLanguage_SelectionChanged">
                         <ComboBoxItem Content="Türkçe" />
                         <ComboBoxItem Content="English" />
                     </ComboBox>
@@ -204,7 +204,7 @@
             </Border>
 
             <!-- ═══ Hakkında ═══ -->
-            <TextBlock Text="Hakkında"
+            <TextBlock Text="{DynamicResource Str_About}"
                        Foreground="{StaticResource BrushTextSecondary}"
                        FontFamily="{StaticResource FontPrimary}"
                        FontSize="{StaticResource FontSizeS}"
@@ -228,7 +228,7 @@
 
             <!-- Kaydet Butonu -->
             <Button x:Name="BtnSaveSettings"
-                    Content="💾  Ayarları Kaydet"
+                    Content="{DynamicResource Str_BtnSaveSettings}"
                     Style="{StaticResource BtnPrimary}"
                     HorizontalAlignment="Right"
                     Margin="0,8,0,0"
