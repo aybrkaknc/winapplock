@@ -1,6 +1,7 @@
 <Window x:Class="WinAppLock.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WinAppLock.UI.Views"
         Title="WinAppLock"
         Width="900" Height="620"
         MinWidth="750" MinHeight="500"
@@ -224,14 +225,10 @@
                     </ScrollViewer>
                 </Grid>
 
-                <!-- ─── Settings Content (Gizli, toggle ile geçiş) ─── -->
+                <!-- ─── Settings Content (SettingsView UserControl) ─── -->
                 <Grid x:Name="SettingsContent" Grid.Column="1"
                       Visibility="Collapsed" Margin="24,16,24,16">
-                    <TextBlock Text="Ayarlar sayfası (yapım aşamasında)"
-                               Foreground="{StaticResource BrushTextSecondary}"
-                               FontSize="{StaticResource FontSizeLG}"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Center" />
+                    <local:SettingsView x:Name="SettingsViewControl" />
                 </Grid>
 
             </Grid>
