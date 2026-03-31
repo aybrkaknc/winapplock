@@ -69,10 +69,10 @@
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="/Assets/Icons/computer.png" Width="16" Height="16" Margin="0,0,4,0" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                                <TextBlock Text="{DynamicResource Str_TabDashboard}" />
+                                <TextBlock Text="{DynamicResource Str_Dashboard}" />
                             </StackPanel>
                         </TabItem.Header>
-                        <Grid Background="{StaticResource BrushWindow}">
+                        <Grid Background="{StaticResource BrushRetroFace}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
@@ -137,7 +137,7 @@
                         </Border>
 
                         <Border Grid.Column="1" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Padding="4,1" Margin="4,0,0,0" Width="100">
-                            <TextBlock Text="v0.0.102" FontSize="10" HorizontalAlignment="Center" />
+                            <TextBlock Text="v0.0.103.1" FontSize="10" HorizontalAlignment="Center" />
                         </Border>
                     </Grid>
                 </Border>
