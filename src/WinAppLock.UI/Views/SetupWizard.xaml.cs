@@ -35,6 +35,14 @@ public partial class SetupWizard : Window
         UpdateStepUI();
     }
 
+    /// <summary>
+    /// ResourceDictionary'den lokalize metin çeker.
+    /// </summary>
+    private static string L(string key, string fallback = "")
+    {
+        return Application.Current.TryFindResource(key)?.ToString() ?? fallback;
+    }
+
     /// <summary>Sihirbaz başlığını sürükleyerek pencereyi taşıma.</summary>
     private void WizardHeader_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -78,7 +86,7 @@ public partial class SetupWizard : Window
     private void BtnCopyRecoveryKey_Click(object sender, RoutedEventArgs e)
     {
         Clipboard.SetText(_generatedRecoveryKey);
-        BtnCopyRecoveryKey.Content = "✓  Kopyalandı!";
+        BtnCopyRecoveryKey.Content = L("Str_Copied", "✓  Kopyalandı!");
     }
 
     // ═══════════════════════════════════════
@@ -138,13 +146,13 @@ public partial class SetupWizard : Window
 
                 if (string.IsNullOrEmpty(pw1))
                 {
-                    SetupPasswordError.Text = "Şifre boş olamaz.";
+                    SetupPasswordError.Text = L("Str_PasswordEmpty", "Şifre boş olamaz.");
                     return false;
                 }
 
                 if (pw1 != pw2)
                 {
-                    SetupPasswordError.Text = "Şifreler eşleşmiyor.";
+                    SetupPasswordError.Text = L("Str_PasswordMismatch", "Şifreler eşleşmiyor.");
                     return false;
                 }
 
@@ -190,15 +198,15 @@ public partial class SetupWizard : Window
                 // Başlığı yönteme göre güncelle
                 if (_selectedAuthMethod == AuthMethod.Pin)
                 {
-                    Step3Title.Text = $"Master PIN Belirle ({_selectedPinLength} Hane)";
-                    Step3Description.Text = "Bu PIN'i her kilitli uygulamayı açmak için kullanacaksın.";
+                    Step3Title.Text = string.Format(L("Str_MasterPinSet", "Master PIN Belirle ({0} Hane)"), _selectedPinLength);
+                    Step3Description.Text = L("Str_MasterPinSetDesc", "Bu PIN'i her kilitli uygulamayı açmak için kullanacaksın.");
                     SetupPasswordBox1.MaxLength = _selectedPinLength;
                     SetupPasswordBox2.MaxLength = _selectedPinLength;
                 }
                 else
                 {
-                    Step3Title.Text = "Master Şifre Belirle";
-                    Step3Description.Text = "Bu şifreyi her kilitli uygulamayı açmak için kullanacaksın.";
+                    Step3Title.Text = L("Str_MasterPasswordSet", "Master Şifre Belirle");
+                    Step3Description.Text = L("Str_MasterPasswordSetDesc", "Bu şifreyi her kilitli uygulamayı açmak için kullanacaksın.");
                     SetupPasswordBox1.MaxLength = 64;
                     SetupPasswordBox2.MaxLength = 64;
                 }
@@ -209,7 +217,7 @@ public partial class SetupWizard : Window
                 // Recovery key üret
                 _generatedRecoveryKey = RecoveryManager.GenerateRecoveryKey();
                 RecoveryKeyDisplay.Text = _generatedRecoveryKey;
-                BtnCopyRecoveryKey.Content = "📋  Panoya Kopyala";
+                BtnCopyRecoveryKey.Content = L("Str_BtnCopy", "📋  Panoya Kopyala");
                 break;
         }
     }
@@ -234,9 +242,19 @@ public partial class SetupWizard : Window
             case 5: Step5SecurityQuestion.Visibility = Visibility.Visible; break;
         }
 
-        // Adım metni
-        var stepNames = new[] { "", "Hoş Geldin", "Kilit Yöntemi", "Şifre Belirle", "Kurtarma Anahtarı", "Güvenlik Sorusu" };
-        WizardStepText.Text = $"Adım {_currentStep}/{TOTAL_STEPS} — {stepNames[_currentStep]}";
+        // Adım metni (lokalize)
+        var stepNames = new[]
+        {
+            "",
+            L("Str_Step1Name", "Hoş Geldin"),
+            L("Str_Step2Name", "Kilit Yöntemi"),
+            L("Str_Step3Name", "Şifre Belirle"),
+            L("Str_Step4Name", "Kurtarma Anahtarı"),
+            L("Str_Step5Name", "Güvenlik Sorusu")
+        };
+        WizardStepText.Text = string.Format(
+            L("Str_StepFormat", "Adım {0}/{1} — {2}"),
+            _currentStep, TOTAL_STEPS, stepNames[_currentStep]);
 
         // İlerleme çubuğu genişliği (% hesap)
         var progressWidth = (double)_currentStep / TOTAL_STEPS * (520 - 48); // padding çıkar
@@ -248,8 +266,10 @@ public partial class SetupWizard : Window
         // Atla butonu (sadece güvenlik sorusu adımında)
         BtnWizardSkip.Visibility = _currentStep == 5 ? Visibility.Visible : Visibility.Collapsed;
 
-        // İleri buton metni
-        BtnWizardNext.Content = _currentStep == TOTAL_STEPS ? "Tamamla ✓" : "Devam →";
+        // İleri buton metni (lokalize)
+        BtnWizardNext.Content = _currentStep == TOTAL_STEPS
+            ? L("Str_BtnComplete", "Tamamla ✓")
+            : L("Str_BtnNext", "Devam →");
     }
 
     // ═══════════════════════════════════════

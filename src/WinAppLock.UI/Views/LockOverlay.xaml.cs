@@ -37,6 +37,7 @@ public partial class LockOverlay : Window
     private string _currentPin = string.Empty;
     private int _failedAttempts;
     private DateTime? _cooldownUntil;
+    private bool _isAuthSuccessful;
 
     /// <summary>Doğrulama başarılı olduğunda tetiklenir.</summary>
     public event Action<int>? AuthSuccess;
@@ -81,6 +82,7 @@ public partial class LockOverlay : Window
         _currentPin = string.Empty;
         _failedAttempts = 0;
         _cooldownUntil = null;
+        _isAuthSuccessful = false;
 
         // UI güncelle
         OverlayAppName.Text = appName;
@@ -117,14 +119,14 @@ public partial class LockOverlay : Window
         {
             PinInputArea.Visibility = Visibility.Visible;
             PasswordInputArea.Visibility = Visibility.Collapsed;
-            OverlayPromptText.Text = Application.Current.TryFindResource("Str_EnterPin")?.ToString() ?? "Bu uygulama kilitli. PIN kodunu gir.";
+            OverlayPromptText.Text = L("Str_EnterPin", "Bu uygulama kilitli. PIN kodunu gir.");
             InitPinDots();
         }
         else
         {
             PinInputArea.Visibility = Visibility.Collapsed;
             PasswordInputArea.Visibility = Visibility.Visible;
-            OverlayPromptText.Text = Application.Current.TryFindResource("Str_EnterPassword")?.ToString() ?? "Bu uygulama kilitli. Şifreni gir.";
+            OverlayPromptText.Text = L("Str_EnterPassword", "Bu uygulama kilitli. Şifreni gir.");
             OverlayPasswordBox.Password = string.Empty;
         }
 
@@ -248,21 +250,42 @@ public partial class LockOverlay : Window
     // ═══════════════════════════════════════
 
     /// <summary>
-    /// Girilen PIN veya şifreyi doğrular.
-    /// Başarılıysa process resume tetikler, başarısızsa hata animasyonu gösterir.
+    /// Şifre doğrulama.
     /// </summary>
     private void ValidateInput(string input)
     {
-        var isValid = _authenticator.Verify(input, _passwordHash);
+        if (IsCoolingDown()) return;
 
-        if (isValid)
+        if (_authenticator.Verify(input, _passwordHash))
         {
+            // Başarılı
+            _isAuthSuccessful = true;
             OnAuthenticationSuccess();
         }
         else
         {
+            // Başarısız
             OnAuthenticationFailed();
         }
+    }
+
+    /// <summary>
+    /// Çarpıya, ALT+F4'e veya ESC'ye tıklandığında (Şifre başarıyla girilmeden kapatılırsa),
+    /// process'i arkada açık bırakmamak adına AuthCancelled fırlatarak Service'e iptal bildiririz.
+    /// </summary>
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (!_isAuthSuccessful)
+        {
+            AuthCancelled?.Invoke(_processId);
+        }
+        base.OnClosing(e);
+    }
+
+    /// <summary>Kullanıcı İptal Et butonuna bastığında.</summary>
+    private void BtnCancel_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     /// <summary>Başarılı doğrulama: animasyon oynat ve overlay'i kapat.</summary>
@@ -398,10 +421,11 @@ public partial class LockOverlay : Window
             e.Handled = true;
         }
 
-        // Escape engelle
+        // Escape basıldığında kapansın (İptal)
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
+            Close();
         }
 
         // Sayısal tuşlarla PIN girişi (klavyeden)

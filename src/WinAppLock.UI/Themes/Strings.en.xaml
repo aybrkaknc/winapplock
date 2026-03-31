@@ -112,4 +112,40 @@
     <sys:String x:Key="Str_Saved">✓  Saved!</sys:String>
     <sys:String x:Key="Str_ChangePasswordSoon">Password change feature will be added soon.</sys:String>
 
+    <!-- SetupWizard Code-Behind -->
+    <sys:String x:Key="Str_Copied">✓  Copied!</sys:String>
+    <sys:String x:Key="Str_PasswordEmpty">Password cannot be empty.</sys:String>
+    <sys:String x:Key="Str_PasswordMismatch">Passwords do not match.</sys:String>
+    <sys:String x:Key="Str_MasterPinSet">Set Master PIN ({0} Digits)</sys:String>
+    <sys:String x:Key="Str_MasterPinSetDesc">You will use this PIN to unlock every protected application.</sys:String>
+    <sys:String x:Key="Str_MasterPasswordSet">Set Master Password</sys:String>
+    <sys:String x:Key="Str_MasterPasswordSetDesc">You will use this password to unlock every protected application.</sys:String>
+    <sys:String x:Key="Str_StepFormat">Step {0}/{1} — {2}</sys:String>
+    <sys:String x:Key="Str_Step1Name">Welcome</sys:String>
+    <sys:String x:Key="Str_Step2Name">Lock Method</sys:String>
+    <sys:String x:Key="Str_Step3Name">Set Password</sys:String>
+    <sys:String x:Key="Str_Step4Name">Recovery Key</sys:String>
+    <sys:String x:Key="Str_Step5Name">Security Question</sys:String>
+
+    <!-- App.xaml.cs -->
+    <sys:String x:Key="Str_AlreadyRunning">WinAppLock is already running!</sys:String>
+    <sys:String x:Key="Str_UnexpectedError">An unexpected error occurred:</sys:String>
+    <sys:String x:Key="Str_TrayAllLocked">All apps locked! 🔐</sys:String>
+    <sys:String x:Key="Str_UnknownApp">Unknown Application</sys:String>
+
+    <!-- LockOverlay XAML -->
+    <sys:String x:Key="Str_OverlayTitle">WinAppLock - Authentication</sys:String>
+    <sys:String x:Key="Str_DefaultPrompt">This app is locked. Enter your credentials to continue.</sys:String>
+
+    <!-- MainWindow Tooltips -->
+    <sys:String x:Key="Str_ToolTipMinimize">Minimize</sys:String>
+    <sys:String x:Key="Str_ToolTipClose">Minimize to System Tray</sys:String>
+    <sys:String x:Key="Str_ToolTipAddApp">Lock a new application</sys:String>
+
+    <!-- TrayIconService -->
+    <sys:String x:Key="Str_TrayTooltip">WinAppLock — Apps are protected</sys:String>
+    <sys:String x:Key="Str_TrayOpen">Open WinAppLock</sys:String>
+    <sys:String x:Key="Str_TrayLockAll">🔐 Lock All</sys:String>
+    <sys:String x:Key="Str_TrayExit">Exit</sys:String>
+
 </ResourceDictionary>

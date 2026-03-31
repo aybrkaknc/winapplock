@@ -23,6 +23,9 @@ public class PipeServer : IDisposable
     /// <summary>UI'dan mesaj alındığında tetiklenen event.</summary>
     public event Action<PipeMessage>? MessageReceived;
 
+    /// <summary>Dead-Man's Switch için UI bağlantısı (Timeout) koptuğunda tetiklenen event.</summary>
+    public event Action? ConnectionLost;
+
     /// <summary>
     /// Pipe sunucusunu başlatır ve UI'dan gelen mesajları dinlemeye başlar.
     /// </summary>
@@ -55,9 +58,26 @@ public class PipeServer : IDisposable
     /// <summary>
     /// UI'ya tümü kilitlendi mesajı gönderir.
     /// </summary>
+    /// <summary>
+    /// UI'ya tümü kilitlendi mesajı gönderir.
+    /// </summary>
     public void SendAllLocked()
     {
         var message = new PipeMessage { Type = PipeMessageType.AllLocked };
+        SendMessage(PipeConstants.SERVICE_TO_UI_PIPE, message);
+    }
+
+    /// <summary>
+    /// UI Gözlemcisi (Sensör) için aktif ve izlenmesi gereken ağaçların listesini yollar.
+    /// </summary>
+    public void SendTrackingListUpdate(Dictionary<int, List<int>> trackingList)
+    {
+        var message = new PipeMessage
+        {
+            Type = PipeMessageType.TrackingListUpdated,
+            Payload = JsonSerializer.Serialize(trackingList)
+        };
+
         SendMessage(PipeConstants.SERVICE_TO_UI_PIPE, message);
     }
 
@@ -88,6 +108,7 @@ public class PipeServer : IDisposable
             catch (TimeoutException)
             {
                 Log.Debug("UI pipe bağlantısı zaman aşımı (UI kapalı olabilir): {Pipe}", pipeName);
+                ConnectionLost?.Invoke();
             }
             catch (Exception ex)
             {

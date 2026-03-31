@@ -16,17 +16,29 @@ public partial class App : Application
     private static Mutex? _mutex;
     private TrayIconService? _trayService;
     private PipeClient? _pipeClient;
+    private WindowObserverService? _windowObserver;
     private GlobalHotkeyService? _hotkeyService;
+
+    /// <summary>
+    /// ResourceDictionary'den lokalize metin çeker.
+    /// </summary>
+    private static string L(string key, string fallback = "")
+    {
+        return Application.Current.TryFindResource(key)?.ToString() ?? fallback;
+    }
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        // UI'ın şifre ekranını gecikmesiz açması için işlemci önceliğini yükseltiyoruz
+        System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+
         // Tek instance kontrolü — aynı anda birden fazla WinAppLock UI açılmasını engeller
         const string MUTEX_NAME = "WinAppLock_UI_SingleInstance";
         _mutex = new Mutex(true, MUTEX_NAME, out bool isNewInstance);
 
         if (!isNewInstance)
         {
-            MessageBox.Show("WinAppLock zaten çalışıyor!", "WinAppLock",
+            MessageBox.Show(L("Str_AlreadyRunning", "WinAppLock zaten çalışıyor!"), "WinAppLock",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             Current.Shutdown();
             return;
@@ -35,8 +47,8 @@ public partial class App : Application
         // Global exception handler
         DispatcherUnhandledException += (_, args) =>
         {
-            MessageBox.Show($"Beklenmeyen bir hata oluştu:\n{args.Exception.Message}",
-                "WinAppLock Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"{L("Str_UnexpectedError", "Beklenmeyen bir hata oluştu:")}\n{args.Exception.Message}",
+                "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
         };
 
@@ -94,6 +106,13 @@ public partial class App : Application
         _pipeClient = new PipeClient();
         _pipeClient.StartListening();
         _pipeClient.MessageReceived += OnServiceMessage;
+        
+        // Window Observer Sensörünü başlat (PipeClient Message Received'a burada sonradan da abone olabilir)
+        _windowObserver = new WindowObserverService(_pipeClient);
+        _windowObserver.Start();
+
+        // MainWindow'a PipeClient referansını bağla (TODO'ları aktifleştir)
+        mainWindow.SetPipeClient(_pipeClient);
 
         // ─── Global Hotkey (Ctrl+Alt+L) ───
         _hotkeyService = new GlobalHotkeyService();
@@ -104,7 +123,7 @@ public partial class App : Application
         _hotkeyService.HotkeyPressed += () =>
         {
             _pipeClient?.SendLockAll();
-            _trayService?.ShowBalloon("WinAppLock", "Tüm uygulamalar kilitlendi! 🔐");
+            _trayService?.ShowBalloon("WinAppLock", L("Str_TrayAllLocked", "Tüm uygulamalar kilitlendi! 🔐"));
         };
     }
 
@@ -122,7 +141,7 @@ public partial class App : Application
                     break;
 
                 case PipeMessageType.AllLocked:
-                    _trayService?.ShowBalloon("WinAppLock", "Tüm uygulamalar kilitlendi.");
+                    _trayService?.ShowBalloon("WinAppLock", L("Str_TrayAllLocked", "Tüm uygulamalar kilitlendi! 🔐"));
                     break;
             }
         });
@@ -156,10 +175,15 @@ public partial class App : Application
         {
             _pipeClient?.SendAuthSuccess(processId, message.AppName);
         };
+        
+        overlay.AuthCancelled += processId =>
+        {
+            _pipeClient?.SendAuthCancelled(processId);
+        };
 
         overlay.ShowForProcess(
             message.ProcessId,
-            message.AppName ?? "Bilinmeyen Uygulama",
+            message.AppName ?? L("Str_UnknownApp", "Bilinmeyen Uygulama"),
             iconBase64,
             customPasswordHash);
     }
@@ -168,6 +192,7 @@ public partial class App : Application
     {
         _hotkeyService?.Dispose();
         _pipeClient?.Dispose();
+        _windowObserver?.Dispose();
         _trayService?.Dispose();
         _mutex?.ReleaseMutex();
         _mutex?.Dispose();

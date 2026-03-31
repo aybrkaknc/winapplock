@@ -1,0 +1,7 @@
+C:\Users\Ayberk.DESKTOP-PL3VNE8\Documents\Ayberk\Antigravity Projeler\WinAppLock\src\WinAppLock.Service\Workers\ProcessWatcherWorker.cs(112,31): error CS0103: 'Process' adı geçerli bağlamda yok [C:\Users\Ayberk.DESKTOP-PL3VNE8\Documents\Ayberk\Antigravity Projeler\WinAppLock\src\WinAppLock.Service\WinAppLock.Service.csproj]
+
+Oluşturma BAŞARISIZ OLDU.
+    0 Uyarı
+    1 Hata
+
+Geçen Süre 00:00:00.76

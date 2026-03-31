@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>WinAppLock.Gatekeeper</RootNamespace>
+    <AssemblyName>WinAppLock.Gatekeeper</AssemblyName>
+    <Version>0.0.101</Version>
+    <!-- Gatekeeper penceresiz çalışır, konsol penceresi de gizlenecek -->
+    <DisableWinExeManifest>false</DisableWinExeManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WinAppLock.Core\WinAppLock.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -31,7 +31,7 @@ public class TrayIconService : IDisposable
     {
         _notifyIcon = new NotifyIcon
         {
-            Text = "WinAppLock — Uygulamalar korunuyor",
+            Text = L("Str_TrayTooltip", "WinAppLock — Uygulamalar korunuyor"),
             Visible = true,
 
             // Varsayılan ikon (uygulama ikonu veya sistem ikonu)
@@ -44,23 +44,32 @@ public class TrayIconService : IDisposable
         // Sağ tık menüsü
         var contextMenu = new ContextMenuStrip();
 
-        var showItem = new ToolStripMenuItem("WinAppLock'u Aç");
+        var showItem = new ToolStripMenuItem(L("Str_TrayOpen", "WinAppLock'u Aç"));
         showItem.Click += (_, _) => ShowRequested?.Invoke();
         contextMenu.Items.Add(showItem);
 
         contextMenu.Items.Add(new ToolStripSeparator());
 
-        var lockAllItem = new ToolStripMenuItem("🔐 Tümünü Kilitle");
+        var lockAllItem = new ToolStripMenuItem(L("Str_TrayLockAll", "🔐 Tümünü Kilitle"));
         lockAllItem.Click += (_, _) => LockAllRequested?.Invoke();
         contextMenu.Items.Add(lockAllItem);
 
         contextMenu.Items.Add(new ToolStripSeparator());
 
-        var exitItem = new ToolStripMenuItem("Çıkış");
+        var exitItem = new ToolStripMenuItem(L("Str_TrayExit", "Çıkış"));
         exitItem.Click += (_, _) => ExitRequested?.Invoke();
         contextMenu.Items.Add(exitItem);
 
         _notifyIcon.ContextMenuStrip = contextMenu;
+    }
+
+    /// <summary>
+    /// ResourceDictionary'den lokalize metin çeker.
+    /// NotifyIcon WinForms bileşeni olduğu için DynamicResource kullanılamaz.
+    /// </summary>
+    private static string L(string key, string fallback = "")
+    {
+        return System.Windows.Application.Current.TryFindResource(key)?.ToString() ?? fallback;
     }
 
     /// <summary>

@@ -66,11 +66,11 @@
                     <Button x:Name="BtnMinimize" Content="─"
                             Style="{StaticResource BtnIcon}"
                             Click="BtnMinimize_Click"
-                            ToolTip="Küçült" />
+                            ToolTip="{DynamicResource Str_ToolTipMinimize}" />
                     <Button x:Name="BtnClose" Content="✕"
                             Style="{StaticResource BtnIcon}"
                             Click="BtnClose_Click"
-                            ToolTip="System Tray'e Küçült" />
+                            ToolTip="{DynamicResource Str_ToolTipClose}" />
                 </StackPanel>
             </Grid>
 
@@ -177,7 +177,7 @@
                                 Content="{DynamicResource Str_BtnAddApp}"
                                 Style="{StaticResource BtnPrimary}"
                                 Click="BtnAddApp_Click"
-                                ToolTip="Yeni bir uygulamayı kilitle" />
+                                ToolTip="{DynamicResource Str_ToolTipAddApp}" />
                     </Grid>
 
                     <!-- ─── Locked Apps List ─── -->

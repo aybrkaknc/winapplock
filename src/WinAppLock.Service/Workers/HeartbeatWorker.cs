@@ -1,37 +1,66 @@
 using Serilog;
+using WinAppLock.Core.Data;
+using WinAppLock.Core.IPC;
+using WinAppLock.Core.Registry;
 
 namespace WinAppLock.Service.Workers;
 
 /// <summary>
-/// Askıya alınan process'lerin dışarıdan (Task Manager vb.) resume edilip edilmediğini
-/// periyodik olarak kontrol eder. Resume edildiyse tekrar askıya alır.
-/// 
-/// Kontrol aralığı: 1 saniye.
-/// Bu mekanizma "meraklı aile bireyi/iş arkadaşı" seviyesindeki bypass girişimlerini engeller.
+/// IFEO kayıtlarının sağlığını ve legacy askı durumlarını periyodik olarak kontrol eder.
+///
+/// Sorumlulukları:
+///   1. IFEO kayıtlarının kurcalanmadığını doğrula (anti-tamper)
+///   2. Legacy askıdaki process'lerin dışarıdan resume edilmediğini kontrol et
+///   3. UI Sensörüne izlenmesi gereken ağaçları bildir
+///
+/// Kontrol aralığı: 5 saniye.
 /// </summary>
 public class HeartbeatWorker : BackgroundService
 {
     private readonly LockStateManager _lockStateManager;
-    private static readonly TimeSpan CHECK_INTERVAL = TimeSpan.FromSeconds(1);
+    private readonly PipeServer _pipeServer;
+    private readonly AppDatabase _database;
+    private static readonly TimeSpan CHECK_INTERVAL = TimeSpan.FromSeconds(5);
 
-    public HeartbeatWorker(LockStateManager lockStateManager)
+    /// <summary>Son IFEO doğrulama zamanı. Ağır işlem olduğu için her döngüde yapılmaz.</summary>
+    private DateTime _lastIfeoCheck = DateTime.MinValue;
+    private static readonly TimeSpan IFEO_CHECK_INTERVAL = TimeSpan.FromSeconds(30);
+
+    public HeartbeatWorker(LockStateManager lockStateManager, PipeServer pipeServer, AppDatabase database)
     {
         _lockStateManager = lockStateManager;
+        _pipeServer = pipeServer;
+        _database = database;
     }
 
     /// <summary>
-    /// Her saniye askıya alınan process'lerin durumunu kontrol eder.
-    /// Eğer bir process beklenmedik şekilde resume edildiyse tekrar askıya alır.
+    /// Periyodik kontrol döngüsü.
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Log.Information("Heartbeat kontrolü başlatıldı (aralık: {Interval}s)", CHECK_INTERVAL.TotalSeconds);
+        Log.Information("Heartbeat kontrolü başlatıldı (aralık: {Interval}s, IFEO doğrulama: {IfeoInterval}s)",
+            CHECK_INTERVAL.TotalSeconds, IFEO_CHECK_INTERVAL.TotalSeconds);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
+                // Legacy askıdaki process kontrolü (Suspend bypass tespiti)
                 CheckSuspendedProcesses();
+
+                // UI Sensörü için aktif takip listesini yolla
+                var trackingList = _lockStateManager.GetTreesToTrack();
+                if (trackingList.Count > 0)
+                {
+                    _pipeServer.SendTrackingListUpdate(trackingList);
+                }
+
+                // IFEO sağlık kontrolü (belirli aralıklarla)
+                if ((DateTime.UtcNow - _lastIfeoCheck) >= IFEO_CHECK_INTERVAL)
+                {
+                    VerifyIfeoHealth();
+                    _lastIfeoCheck = DateTime.UtcNow;
+                }
             }
             catch (Exception ex)
             {
@@ -43,8 +72,8 @@ public class HeartbeatWorker : BackgroundService
     }
 
     /// <summary>
-    /// Askıya alınmış tüm process'leri kontrol eder.
-    /// Dışarıdan resume edilmiş olanları tekrar askıya alır.
+    /// Legacy askıya alınmış process'leri kontrol eder.
+    /// Dışarıdan resume edilmişleri tekrar askıya alır.
     /// </summary>
     private void CheckSuspendedProcesses()
     {
@@ -52,22 +81,48 @@ public class HeartbeatWorker : BackgroundService
 
         foreach (var (processId, info) in suspendedProcesses)
         {
-            // Process artık çalışmıyorsa (kapatılmış/crash olmuş) kaydı temizle
             if (!ProcessController.IsProcessRunning(processId))
             {
                 Log.Debug("Askıdaki process artık çalışmıyor: PID {PID}", processId);
                 continue;
             }
 
-            // Process hâlâ askıdaysa sorun yok
             if (ProcessController.IsProcessSuspended(processId))
                 continue;
 
-            // Process dışarıdan resume edilmiş! Tekrar askıya al.
             Log.Warning("Process dışarıdan resume edildi, tekrar askıya alınıyor: PID {PID} ({App})",
-                processId, info.LockedApp.DisplayName);
+                processId, info.DisplayName);
 
             ProcessController.SuspendProcess(processId);
+        }
+    }
+
+    /// <summary>
+    /// IFEO kayıtlarının kurcalanmadığını doğrular.
+    /// Eksik veya bozuk kayıtları yeniden yazar (anti-tamper).
+    /// </summary>
+    private void VerifyIfeoHealth()
+    {
+        var gatekeeperPath = PipeConstants.GATEKEEPER_DEPLOY_PATH;
+
+        if (!File.Exists(gatekeeperPath))
+        {
+            Log.Debug("[Heartbeat] Gatekeeper.exe bulunamadı, IFEO doğrulama atlanıyor.");
+            return;
+        }
+
+        var enabledApps = _database.GetEnabledLockedApps();
+
+        foreach (var app in enabledApps)
+        {
+            var exeName = app.Identity.ExecutableName;
+            if (string.IsNullOrWhiteSpace(exeName)) continue;
+
+            if (!IfeoRegistrar.IsRegistered(exeName))
+            {
+                Log.Warning("[Heartbeat] IFEO kaydı eksik/silinmiş tespit edildi: {ExeName}. Yeniden yazılıyor.", exeName);
+                IfeoRegistrar.RegisterApp(exeName, gatekeeperPath);
+            }
         }
     }
 }

@@ -1,213 +1,367 @@
 using System.Collections.Concurrent;
 using Serilog;
 using WinAppLock.Core.Models;
+using System.Diagnostics;
+using WinAppLock.Core.Identification;
+using System.Linq;
 
 namespace WinAppLock.Service;
 
 /// <summary>
-/// Askıya alınan process'lerin kilit/oturum durumunu yönetir.
-/// 
-/// Sorumlulukları:
-/// - Askıya alınan process'lerin kaydını tutar
-/// - Şifre sonrası oturum başlatır (aynı uygulama tekrar açılırsa şifre sorma)
-/// - RelockBehavior'a göre otomatik tekrar kilitleme
-/// - Process kapandığında oturumu temizler
+/// Sistemdeki süreçleri zombi PID'lerden ayırmak için oluşturulma zamanını da tutan veri yapısı.
 /// </summary>
+public record ProcessNode(int ProcessId, int ParentProcessId, string ProcessName, string? ExecutablePath, DateTime CreationTime);
+
+/// <summary>
+/// Aynı kilit havuzuna (Aileye) dahil olan tüm süreçleri tutan ağaç yapısı.
+/// Eğer kilit açıldıysa (IsUnlocked=true), bu ağaca giren hiç kimse şifre sormaz.
+/// </summary>
+public class LockTree
+{
+    public LockedApp RootApp { get; init; } = null!;
+    public bool IsUnlocked { get; set; } = false;
+    public Timer? RelockTimer { get; set; }
+    public ConcurrentDictionary<int, ProcessNode> Nodes { get; } = new();
+
+    public void AddNode(ProcessNode node) => Nodes[node.ProcessId] = node;
+    public void RemoveNode(int processId) => Nodes.TryRemove(processId, out _);
+    public bool IsEmpty => Nodes.IsEmpty;
+}
+
 public class LockStateManager
 {
-    /// <summary>Askıya alınan process'ler: PID → LockedApp bilgisi.</summary>
-    private readonly ConcurrentDictionary<int, SuspendedProcessInfo> _suspendedProcesses = new();
-
-    /// <summary>Aktif oturumlar: exe adı (küçük harf) → oturum bilgisi.</summary>
-    private readonly ConcurrentDictionary<string, SessionInfo> _activeSessions = new();
+    // Orijinal App ID (LockedApp.Id) -> O Uygulamanın Aktif Ağacı
+    private readonly ConcurrentDictionary<int, LockTree> _lockTrees = new();
+    private readonly ConcurrentDictionary<int, DateTime> _lastTriggeredUi = new();
+    private readonly object _syncRoot = new object();
 
     /// <summary>
-    /// Askıya alınan bir process'i kayıt altına alır.
+    /// Yeni yakalanan bir sürecin herhangi bir ağaca ait olup olmadığını veya yeni bir kilit başlatıp başlatmayacağını belirler.
+    /// Dönen Tuple: (ShouldSuspend, ShouldTriggerUi, MatchedAppName)
     /// </summary>
-    /// <param name="processId">Askıya alınan process'in ID'si</param>
-    /// <param name="lockedApp">İlişkili kilitli uygulama bilgisi</param>
-    public void RegisterSuspendedProcess(int processId, LockedApp lockedApp)
+    public (bool ShouldSuspend, bool ShouldTriggerUi, string? TriggerName) ProcessNewArrivedNode(ProcessNode node, List<LockedApp> activeLockedApps)
     {
-        var info = new SuspendedProcessInfo
+        lock (_syncRoot)
         {
-            ProcessId = processId,
-            LockedApp = lockedApp,
-            SuspendedAt = DateTime.UtcNow
-        };
+            // 1. Ağaç Taraması: Bu süreç hali hazırda var olan bir ağacın parçası mı?
+            foreach (var treeKp in _lockTrees)
+            {
+                var tree = treeKp.Value;
 
-        _suspendedProcesses[processId] = info;
-        Log.Debug("Process kaydedildi: PID {PID}, Uygulama: {App}", processId, lockedApp.DisplayName);
+                // Parent'ımız bu ağaçta mı?
+                bool isParentInTree = tree.Nodes.ContainsKey(node.ParentProcessId);
+
+                // Kendimiz klasörde miyiz veya imzamız bu ağacın efendisine ait mi?
+                bool isSelfMatch = false;
+                if (!string.IsNullOrEmpty(node.ExecutablePath))
+                {
+                    try
+                    {
+                        var identity = AppIdentifier.CreateIdentity(node.ExecutablePath);
+                        isSelfMatch = AppIdentifier.IsMatch(identity, tree.RootApp);
+                    }
+                    catch (Exception) { /* Ignored */ }
+                }
+
+                // KURAL 1 & KURAL 2 (Overreach Filtresi ve Updater'ları Koruma):
+                // isSelfMatch: İmzası veya klasörü tutuyor, kesinlikle bizim ailemizden (Babasız-Öksüz olsa bile).
+                // isParentInTree: Babası ağaçtan fırlattı, peki biz kimi çalıştırıyor?
+                bool isTemporaryTool = node.ExecutablePath != null && 
+                                      (node.ExecutablePath.Contains(@"\Temp\", StringComparison.OrdinalIgnoreCase) || 
+                                       node.ExecutablePath.Contains(@"\AppData\", StringComparison.OrdinalIgnoreCase));
+
+                if (isSelfMatch || (isParentInTree && isTemporaryTool))
+                {
+                    // Ağaca aitsin!
+                    tree.AddNode(node);
+                    Log.Information("[Tree] Düğüm Eklendi: {App} (PID: {PID}) -> Tree: {TreeName}", node.ProcessName, node.ProcessId, tree.RootApp.DisplayName);
+
+                    if (tree.IsUnlocked)
+                    {
+                        // Şifre önceden girilmiş, ağaç serbest
+                        return (false, false, null);
+                    }
+                    else
+                    {
+                        // Ağaç tutsak, bu süreç de askıya alınmalı
+                        bool triggerUi = CheckDebounce(tree.RootApp.Id);
+                        // KURAL 3: UI ekranında o anki yan programın adı gözüksün (node.ProcessName)
+                        return (true, triggerUi, node.ProcessName); 
+                    }
+                }
+                
+                // NOT: Parent içerde ama çocuk başka yerde ve isTemporary değilse -> OVERREACH. (Örn: Steam'den çıkan Baldurs Gate). Aileye katılmıyor, yola devam.
+            }
+
+            // 2. Hiçbir mevcut ağaca uymadık. Peki kurucu bir süreç miyiz?
+            foreach (var lockedApp in activeLockedApps)
+            {
+                if (!string.IsNullOrEmpty(node.ExecutablePath))
+                {
+                    try
+                    {
+                        var identity = AppIdentifier.CreateIdentity(node.ExecutablePath);
+                        if (AppIdentifier.IsMatch(identity, lockedApp))
+                        {
+                            var newTree = new LockTree { RootApp = lockedApp };
+                            newTree.AddNode(node);
+                            _lockTrees[lockedApp.Id] = newTree;
+
+                            Log.Information("[Tree] Yeni Kilit Ağacı Kuruldu: PID {PID}, Root: {App}", node.ProcessId, lockedApp.DisplayName);
+
+                            return (true, CheckDebounce(lockedApp.Id), node.ProcessName); 
+                        }
+                    }
+                    catch (Exception) { /* Ignored */ }
+                }
+                // Fallback (Sadece path alınamazsa isimle eşleştirme)
+                else if (string.Equals(lockedApp.Identity.ExecutableName, node.ProcessName, StringComparison.OrdinalIgnoreCase))
+                {
+                     var newTree = new LockTree { RootApp = lockedApp };
+                     newTree.AddNode(node);
+                     _lockTrees[lockedApp.Id] = newTree;
+                     Log.Information("[Tree] Yeni Kilit Ağacı Kuruldu (Fallback): PID {PID}, Root: {App}", node.ProcessId, lockedApp.DisplayName);
+                     return (true, CheckDebounce(lockedApp.Id), node.ProcessName);
+                }
+            }
+
+            // Kilit listesinde yokuz, ailelere de uymuyoruz. Özgürüz.
+            return (false, false, null);
+        }
     }
 
-    /// <summary>
-    /// Başarılı kimlik doğrulama sonrası process'i serbest bırakır ve oturum başlatır.
-    /// </summary>
-    /// <param name="processId">Serbest bırakılacak process ID'si</param>
+    private bool CheckDebounce(int appId)
+    {
+        if (_lastTriggeredUi.TryGetValue(appId, out var lastTrigger) && (DateTime.UtcNow - lastTrigger).TotalSeconds < 2)
+            return false;
+        _lastTriggeredUi[appId] = DateTime.UtcNow;
+        return true;
+    }
+
     public void OnAuthSuccess(int processId)
     {
-        if (!_suspendedProcesses.TryRemove(processId, out var info))
+        lock (_syncRoot)
         {
-            Log.Warning("AuthSuccess: PID {PID} kayıtlarda bulunamadı", processId);
-            return;
+            var targetTree = _lockTrees.Values.FirstOrDefault(t => t.Nodes.ContainsKey(processId));
+            if (targetTree == null)
+            {
+                Log.Warning("AuthSuccess: PID {PID} ait olduğu ağaç bulunamadı", processId);
+                return;
+            }
+
+            targetTree.IsUnlocked = true;
+
+            foreach (var node in targetTree.Nodes.Values)
+            {
+                ProcessController.ResumeProcess(node.ProcessId);
+                Log.Debug("[Tree] Resume: {PID}", node.ProcessId);
+            }
+
+            if (targetTree.RootApp.RelockBehavior == RelockBehavior.TimeBased)
+            {
+                StartRelockTimer(targetTree);
+            }
+
+            Log.Information("Ağaç Serbest Bırakıldı: {App}, Toplam Dal Sayısı: {Count}", targetTree.RootApp.DisplayName, targetTree.Nodes.Count);
         }
-
-        // Process'i devam ettir
-        ProcessController.ResumeProcess(processId);
-
-        // Oturum başlat (aynı uygulama tekrar açılırsa şifre sorma)
-        var sessionKey = info.LockedApp.Identity.ExecutableName.ToLowerInvariant();
-        var session = new SessionInfo
-        {
-            AppName = sessionKey,
-            LockedApp = info.LockedApp,
-            StartedAt = DateTime.UtcNow,
-            PrimaryProcessId = processId
-        };
-
-        _activeSessions[sessionKey] = session;
-
-        // RelockBehavior.TimeBased ise zamanlayıcı başlat
-        if (info.LockedApp.RelockBehavior == RelockBehavior.TimeBased)
-        {
-            StartRelockTimer(session, info.LockedApp.RelockTimeMinutes);
-        }
-
-        Log.Information("Oturum başlatıldı: {App}, Relock: {Behavior}",
-            info.LockedApp.DisplayName, info.LockedApp.RelockBehavior);
     }
 
-    /// <summary>
-    /// Kullanıcı şifre ekranını iptal ettiğinde process'i sonlandırır.
-    /// </summary>
-    /// <param name="processId">Sonlandırılacak process ID'si</param>
     public void OnAuthCancelled(int processId)
     {
-        _suspendedProcesses.TryRemove(processId, out _);
+        lock (_syncRoot)
+        {
+            var targetTreeKv = _lockTrees.FirstOrDefault(t => t.Value.Nodes.ContainsKey(processId));
+            if (targetTreeKv.Value == null) return;
+            
+            var targetTree = targetTreeKv.Value;
 
-        try
-        {
-            var process = System.Diagnostics.Process.GetProcessById(processId);
-            // Önce resume et (askıda olan process kill edilemeyebilir)
-            ProcessController.ResumeProcess(processId);
-            process.Kill();
-            Log.Information("Process sonlandırıldı (kullanıcı iptal etti): PID {PID}", processId);
-        }
-        catch (Exception ex)
-        {
-            Log.Debug(ex, "Process sonlandırılırken hata: PID {PID}", processId);
+            foreach (var node in targetTree.Nodes.Values)
+            {
+                try
+                {
+                    // Şifre iptal edildiyse o ağaçtaki tüm kilitli/askıda kalan uygulamaları öldürüyoruz.
+                    var process = Process.GetProcessById(node.ProcessId);
+                    process.Kill(entireProcessTree: true); 
+                    ProcessController.ResumeProcess(node.ProcessId); // Deadlock önleme
+                }
+                catch { /* Kapalı process */ }
+            }
+            
+            _lockTrees.TryRemove(targetTreeKv.Key, out _);
+            Log.Information("Ağaç İmha Edildi (Şifre İptal): {App}", targetTree.RootApp.DisplayName);
         }
     }
 
     /// <summary>
-    /// Belirli bir uygulama için aktif oturum olup olmadığını kontrol eder.
-    /// Aktif oturum varsa aynı uygulamanın yeni instance'larına şifre sorulmaz.
+    /// Bir süreç (PID) kapandığında olaydan haberdar olup ağaçtan düşmesini sağlar.
+    /// Zombi engelleme mantığı gereği gerekirse CreationTime eklenebilir.
     /// </summary>
-    /// <param name="executableName">Kontrol edilecek exe adı</param>
-    /// <returns>Oturum aktifse true</returns>
-    public bool IsSessionActive(string executableName)
+    public void HandleProcessExited(int processId)
     {
-        var key = executableName.ToLowerInvariant();
-        return _activeSessions.ContainsKey(key);
-    }
-
-    /// <summary>
-    /// Process kapandığında çağrılır. OnClose davranışı varsa oturumu sonlandırır.
-    /// </summary>
-    /// <param name="processId">Kapanan process'in ID'si</param>
-    /// <param name="processName">Kapanan process'in adı</param>
-    public void OnProcessExited(int processId, string processName)
-    {
-        // Askıda olan bir process kapandıysa kaydını temizle
-        _suspendedProcesses.TryRemove(processId, out _);
-
-        var key = processName.ToLowerInvariant();
-        if (!_activeSessions.TryGetValue(key, out var session))
-            return;
-
-        // İlk(ana) process kapandıysa ve davranış OnClose ise oturumu bitir
-        if (session.PrimaryProcessId == processId &&
-            session.LockedApp.RelockBehavior == RelockBehavior.OnClose)
+        lock (_syncRoot)
         {
-            _activeSessions.TryRemove(key, out _);
-            session.RelockTimer?.Dispose();
-            Log.Information("Oturum sonlandırıldı (uygulama kapandı): {App}", processName);
+            foreach (var kvp in _lockTrees)
+            {
+                var tree = kvp.Value;
+                if (tree.Nodes.TryRemove(processId, out var removedNode))
+                {
+                    Log.Debug("[Tree] Dal Koptu (Process Exited): {App} (PID: {PID}), Kalan: {Count}", removedNode.ProcessName, processId, tree.Nodes.Count);
+
+                    if (tree.IsEmpty && tree.RootApp.RelockBehavior == RelockBehavior.OnClose)
+                    {
+                        if (_lockTrees.TryRemove(kvp.Key, out _))
+                        {
+                            tree.RelockTimer?.Dispose();
+                            Log.Information("Ağaç Katlandı (Tüm Parçalar Kapandı -> Relock): {App}", tree.RootApp.DisplayName);
+                        }
+                    }
+                }
+            }
         }
     }
 
-    /// <summary>
-    /// Tüm oturumları sonlandırır (Ctrl+Alt+L veya "Tümünü Kilitle" komutu).
-    /// Açık olan kilitli uygulamaları da askıya alır.
-    /// </summary>
     public void LockAll()
     {
-        foreach (var session in _activeSessions.Values)
+        lock (_syncRoot)
         {
-            session.RelockTimer?.Dispose();
-
-            // Ana process hâlâ çalışıyorsa askıya al
-            if (ProcessController.IsProcessRunning(session.PrimaryProcessId))
+            foreach (var kvp in _lockTrees)
             {
-                ProcessController.SuspendProcess(session.PrimaryProcessId);
-                RegisterSuspendedProcess(session.PrimaryProcessId, session.LockedApp);
+                var tree = kvp.Value;
+                tree.RelockTimer?.Dispose();
+                tree.IsUnlocked = false; 
+
+                foreach (var node in tree.Nodes.Values)
+                {
+                    if (ProcessController.IsProcessRunning(node.ProcessId))
+                    {
+                        ProcessController.SuspendProcess(node.ProcessId);
+                    }
+                }
+            }
+            Log.Information("Tüm ağaçlar manuel olarak kilitlendi (LockAll)");
+        }
+    }
+
+    private void StartRelockTimer(LockTree tree)
+    {
+        tree.RelockTimer = new Timer(_ =>
+        {
+            Log.Information("Otomatik Zamanlı Relock Tetiklendi: {App}", tree.RootApp.DisplayName);
+            lock (_syncRoot)
+            {
+                tree.IsUnlocked = false;
+                foreach (var node in tree.Nodes.Values)
+                {
+                    if (ProcessController.IsProcessRunning(node.ProcessId))
+                    {
+                        ProcessController.SuspendProcess(node.ProcessId);
+                    }
+                }
+            }
+            tree.RelockTimer?.Dispose();
+        }, null, TimeSpan.FromMinutes(tree.RootApp.RelockTimeMinutes), Timeout.InfiniteTimeSpan);
+    }
+
+    /// <summary>
+    /// Geriye dönük uyumluluk veya Heartbeat worker için askıdaki programların listesi (Anti-Bypass).
+    /// IsUnlocked = false ise tüm ağaç kilitli kabul edilir.
+    /// </summary>
+    public IReadOnlyDictionary<int, LockedApp> GetSuspendedProcesses()
+    {
+        var dict = new Dictionary<int, LockedApp>();
+        lock (_syncRoot)
+        {
+            foreach (var tree in _lockTrees.Values)
+            {
+                if (!tree.IsUnlocked)
+                {
+                    foreach(var n in tree.Nodes.Values) 
+                    {
+                        dict[n.ProcessId] = tree.RootApp;
+                    }
+                }
             }
         }
-
-        _activeSessions.Clear();
-        Log.Information("Tüm oturumlar sonlandırıldı, kilitler aktif");
+        return dict;
     }
 
     /// <summary>
-    /// Askıya alınmış process'lerin PID listesini döndürür.
-    /// HeartbeatWorker bu listeyi kullanarak dışarıdan resume edilmiş process'leri kontrol eder.
+    /// UI'daki Gözlemciye (WindowObserver) iletilecek "Takip Edilmesi Gereken" ağaçları döner.
+    /// PreventBackgroundExecution = true olan ağaçların AppId -> ProcessId Listesini sağlar.
     /// </summary>
-    /// <returns>Askıda olan process ID ve bilgileri</returns>
-    public IReadOnlyDictionary<int, SuspendedProcessInfo> GetSuspendedProcesses()
+    public Dictionary<int, List<int>> GetTreesToTrack()
     {
-        return _suspendedProcesses;
-    }
-
-    /// <summary>
-    /// Süre bazlı tekrar kilitleme zamanlayıcısı başlatır.
-    /// </summary>
-    private void StartRelockTimer(SessionInfo session, int minutes)
-    {
-        session.RelockTimer = new Timer(_ =>
+        var dict = new Dictionary<int, List<int>>();
+        lock (_syncRoot)
         {
-            Log.Information("Otomatik relock: {App} ({Minutes} dk doldu)", session.AppName, minutes);
-
-            // Oturumu sonlandır
-            _activeSessions.TryRemove(session.AppName, out SessionInfo? _);
-
-            // Process hâlâ çalışıyorsa askıya al
-            if (ProcessController.IsProcessRunning(session.PrimaryProcessId))
+            foreach (var kvp in _lockTrees)
             {
-                ProcessController.SuspendProcess(session.PrimaryProcessId);
-                RegisterSuspendedProcess(session.PrimaryProcessId, session.LockedApp);
+                if (kvp.Value.RootApp.PreventBackgroundExecution)
+                {
+                    dict[kvp.Key] = kvp.Value.Nodes.Keys.ToList();
+                }
             }
-
-            session.RelockTimer?.Dispose();
-        }, null, TimeSpan.FromMinutes(minutes), Timeout.InfiniteTimeSpan);
+        }
+        return dict;
     }
-}
 
-/// <summary>
-/// Askıya alınan process hakkında bilgi.
-/// </summary>
-public class SuspendedProcessInfo
-{
-    public int ProcessId { get; init; }
-    public LockedApp LockedApp { get; init; } = null!;
-    public DateTime SuspendedAt { get; init; }
-}
+    /// <summary>
+    /// UI Sensörü bir uygulamanın görünür penceresi kalmadığında Auth süresini iptal (Invalidate) etmek için uyarır.
+    /// </summary>
+    public void InvalidateSession(int appId)
+    {
+        lock (_syncRoot)
+        {
+            if (_lockTrees.TryGetValue(appId, out var tree))
+            {
+                Log.Information("[Sensor] UI Gözlemcisi, {App} (ID:{ID}) için görünür pencere kalmadığını bildirdi. Oturum PUSU moduna (Kilide) alınıyor.", tree.RootApp.DisplayName, appId);
+                tree.IsUnlocked = false; 
+            }
+        }
+    }
 
-/// <summary>
-/// Aktif oturum bilgisi (şifre girilmiş, uygulama kullanılıyor).
-/// </summary>
-public class SessionInfo
-{
-    public string AppName { get; init; } = string.Empty;
-    public LockedApp LockedApp { get; init; } = null!;
-    public DateTime StartedAt { get; init; }
-    public int PrimaryProcessId { get; init; }
-    public Timer? RelockTimer { get; set; }
+    /// <summary>
+    /// UI Sensörü, gizli/pusudaki uygulamanın yeniden tepsi veya başka yolla pencere fırlattığını iletince Suspend basar.
+    /// </summary>
+    public void SuspendAppProcesses(int appId)
+    {
+        lock (_syncRoot)
+        {
+            if (_lockTrees.TryGetValue(appId, out var tree))
+            {
+                Log.Warning("[Sensor] UI Gözlemcisi pencere dirilmesini (Resurrected) yakaladı! Ağaç {App} ACİL ASKIYA ALINIYOR.", tree.RootApp.DisplayName);
+
+                tree.IsUnlocked = false;
+                foreach (var pid in tree.Nodes.Keys)
+                {
+                    if (ProcessController.IsProcessRunning(pid))
+                        ProcessController.SuspendProcess(pid);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// EĞER UI (SENSÖR) Görev Yöneticisinden veya hata sebebiyle kapanırsa (Pipe Connection Lost) Servis can güvenliğini alır.
+    /// </summary>
+    public void ExecuteDeadManSwitch()
+    {
+        lock (_syncRoot)
+        {
+            Log.Fatal("[SECURITY] SENSÖR UYGULAMASI (UI) ÇÖKTÜ VEYA ÖLDÜRÜLDÜ!");
+            Log.Fatal("[SECURITY] DEAD-MAN'S SWITCH AKTİVASYONU: TÜM AĞAÇLAR DONDURULUYOR!");
+
+            foreach (var kvp in _lockTrees)
+            {
+                var tree = kvp.Value;
+                tree.IsUnlocked = false;
+                
+                foreach (var pid in tree.Nodes.Keys)
+                {
+                    if (ProcessController.IsProcessRunning(pid))
+                        ProcessController.SuspendProcess(pid);
+                }
+            }
+        }
+    }
 }

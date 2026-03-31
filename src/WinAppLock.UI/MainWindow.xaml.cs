@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using WinAppLock.Core.Data;
 using WinAppLock.Core.Identification;
 using WinAppLock.Core.Models;
+using WinAppLock.UI.Services;
 
 namespace WinAppLock.UI;
 
@@ -16,12 +17,23 @@ namespace WinAppLock.UI;
 public partial class MainWindow : Window
 {
     private readonly AppDatabase _database;
+    private PipeClient? _pipeClient;
 
     public MainWindow()
     {
         InitializeComponent();
         _database = new AppDatabase();
         LoadLockedApps();
+    }
+
+    /// <summary>
+    /// PipeClient referansını MainWindow'a bağlar.
+    /// App.xaml.cs tarafından InitializeServices() içinde çağrılır.
+    /// </summary>
+    /// <param name="pipeClient">Aktif PipeClient instance'ı</param>
+    public void SetPipeClient(PipeClient pipeClient)
+    {
+        _pipeClient = pipeClient;
     }
 
     /// <summary>
@@ -191,7 +203,8 @@ public partial class MainWindow : Window
             _database.AddLockedApp(lockedApp);
             LoadLockedApps();
 
-            // TODO: Service'e AppAdded mesajı gönder (PipeClient entegrasyonunda)
+            // Service'e uygulama eklendiğini bildir (kilitli listeyi yenilesin)
+            _pipeClient?.SendAppAdded();
         }
         catch (Exception ex)
         {
@@ -377,7 +390,8 @@ public partial class MainWindow : Window
         app.IsEnabled = isEnabled;
         _database.UpdateLockedApp(app);
 
-        // TODO: Service'e AppToggled mesajı gönder
+        // Service'e toggle değişikliğini bildir
+        _pipeClient?.SendAppToggled();
     }
 
     /// <summary>Uygulamayı kilitli listeden kaldırır (onay ile).</summary>
@@ -395,7 +409,8 @@ public partial class MainWindow : Window
             _database.RemoveLockedApp(appId);
             LoadLockedApps();
 
-            // TODO: Service'e AppRemoved mesajı gönder
+            // Service'e uygulama kaldırıldığını bildir
+            _pipeClient?.SendAppRemoved();
         }
     }
 
@@ -403,11 +418,9 @@ public partial class MainWindow : Window
     // Tümünü Kilitle
     // ═══════════════════════════════════════
 
-    /// <summary>Tüm uygulamaları kilitle.</summary>
+    /// <summary>Tüm uygulamaları kilitle (Service'e LockAll komutu gönderir).</summary>
     private void BtnLockAll_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Service'e LockAll mesajı gönder
-        MessageBox.Show(L("Str_AllLocked", "Tüm kilitli uygulamalar kilitlendi!"),
-            "WinAppLock", MessageBoxButton.OK, MessageBoxImage.Information);
+        _pipeClient?.SendLockAll();
     }
 }

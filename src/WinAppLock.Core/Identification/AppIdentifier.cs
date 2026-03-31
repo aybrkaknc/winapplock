@@ -31,6 +31,7 @@ public static class AppIdentifier
         {
             ExecutableName = fileInfo.Name,
             ExecutablePath = executablePath,
+            DirectoryPath = fileInfo.DirectoryName ?? string.Empty,
             Sha256Hash = ComputeFileHash(executablePath),
             ProductName = versionInfo.ProductName,
             CompanyName = versionInfo.CompanyName,
@@ -75,6 +76,24 @@ public static class AppIdentifier
     {
         var storedIdentity = lockedApp.Identity;
 
+        // Katman 0: KLASÖR TABANLI BATTANİYE KİLİDİ (En geniş kapsam)
+        // Eğer uygulama kök klasörleri eşleşiyorsa (ve sistem klasöründe değilse), tüm çocuk/kardeş süreçleri otomatik yakalar.
+        if (lockedApp.LockChildProcesses && 
+            !string.IsNullOrEmpty(storedIdentity.DirectoryPath) &&
+            !string.IsNullOrEmpty(processIdentity.DirectoryPath) &&
+            !IsSystemFolder(storedIdentity.DirectoryPath))
+        {
+            // İki klasörün sonuna mutlaka '\' koyarak C:\Geek ile C:\GeekUpdater klasörlerinin birbirine karışmasını engelliyoruz.
+            var storedDir = storedIdentity.DirectoryPath.TrimEnd('\\') + "\\";
+            var processDir = processIdentity.DirectoryPath.TrimEnd('\\') + "\\";
+            
+            // Yeni açılan process'in yolu, kilitli uygulamanın klasörünün içinde mi?
+            if (processDir.StartsWith(storedDir, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
         // Katman 1: Hash eşleşmesi (en güvenilir)
         if (!string.IsNullOrEmpty(processIdentity.Sha256Hash) &&
             !string.IsNullOrEmpty(storedIdentity.Sha256Hash) &&
@@ -111,5 +130,35 @@ public static class AppIdentifier
         using var stream = File.OpenRead(filePath);
         var hashBytes = SHA256.HashData(stream);
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Kritik sistem klasörlerini (Kazara sistemi kitlememek için) filtreler
+    /// </summary>
+    public static bool IsSystemFolder(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return true;
+
+        var normalized = Path.GetFullPath(path).TrimEnd('\\');
+
+        // Kök dizin (C:\, D:\ vs.)
+        if (normalized.Equals(Path.GetPathRoot(normalized)?.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Windows Klasörleri
+        var sysRoot = Environment.GetFolderPath(Environment.SpecialFolder.Windows).TrimEnd('\\');
+        if (normalized.StartsWith(sysRoot, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Program Files Kökü (Sadece C:\Program Files\) - Uygulamalar bu klasörün İÇİNDEKİ klasörlerde olduğu için kök kilitlenemez
+        var pf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).TrimEnd('\\');
+        if (normalized.Equals(pf, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var pf86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86).TrimEnd('\\');
+        if (normalized.Equals(pf86, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
     }
 }

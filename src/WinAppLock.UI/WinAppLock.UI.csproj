@@ -9,8 +9,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>WinAppLock.UI</RootNamespace>
     <AssemblyName>WinAppLock.UI</AssemblyName>
-    <Version>0.0.100</Version>
+    <Version>0.0.101</Version>
     <!-- <ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon> -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

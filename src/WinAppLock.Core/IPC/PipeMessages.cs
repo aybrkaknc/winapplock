@@ -16,12 +16,21 @@ public enum PipeMessageType
     /// <summary>Tüm uygulamalar kilitlendi (Ctrl+Alt+L veya tray menüsü).</summary>
     AllLocked,
 
+    /// <summary>Servisten UI'a: İzlenmesi istenen Aktif Oturum listesi güncellendi (JSON formatında AppId + Pids).</summary>
+    TrackingListUpdated,
+
     // ─── UI → Service Mesajları ───
     /// <summary>Kullanıcı doğru şifre girdi, process devam ettirilmeli.</summary>
     AuthSuccess,
 
     /// <summary>Kullanıcı overlay'i iptal etti, process sonlandırılmalı.</summary>
     AuthCancelled,
+
+    /// <summary>UI'dan Servise: Bu uygulamanın hiç penceresi kalmadı, kilide pusula (Suspend/Kill atma, oturumu kitle).</summary>
+    SessionInvalidated,
+
+    /// <summary>UI'dan Servise: Tepsideki bu uygulama tekrar UI fırlattı, Çabuk Suspend at ve kilit bas!</summary>
+    WindowResurrected,
 
     /// <summary>Yeni uygulama kilitli listeye eklendi.</summary>
     AppAdded,
@@ -83,4 +92,18 @@ public static class PipeConstants
 
     /// <summary>Mesaj okuma/yazma buffer boyutu (byte).</summary>
     public const int BUFFER_SIZE = 4096;
+
+    /// <summary>Gatekeeper ↔ Service duplex pipe adı. İstek ve yanıt aynı bağlantıda taşınır.</summary>
+    public const string GATEKEEPER_PIPE = "WinAppLock_Gatekeeper";
+
+    /// <summary>Gatekeeper'ın Service yanıtı için maksimum bekleme süresi (milisaniye).</summary>
+    public const int GATEKEEPER_TIMEOUT_MS = 120_000; // 2 dakika (şifre giriş süresi)
+
+    /// <summary>Gatekeeper'ın Service'e bağlanma zaman aşımı (milisaniye). Fail-Closed politikası.</summary>
+    public const int GATEKEEPER_CONNECT_TIMEOUT_MS = 5_000;
+
+    /// <summary>Gatekeeper.exe'nin varsayılan deploy konumu.</summary>
+    public static readonly string GATEKEEPER_DEPLOY_PATH = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "WinAppLock", "WinAppLock.Gatekeeper.exe");
 }

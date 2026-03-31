@@ -94,6 +94,14 @@ public class PipeClient : IDisposable
     public void SendSettingsUpdated() =>
         SendToService(new PipeMessage { Type = PipeMessageType.SettingsUpdated });
 
+    /// <summary>Uygulamanın penceresinin artık görünmez olduğunu (kapandığını) Service'e bildirir.</summary>
+    public void SendSessionInvalidated(int appId) =>
+        SendToService(new PipeMessage { Type = PipeMessageType.SessionInvalidated, ProcessId = appId });
+
+    /// <summary>Uygulamanın yeniden pencere fırlattığını ve acilen askıya alınması gerektiğini Service'e bildirir.</summary>
+    public void SendWindowResurrected(int appId) =>
+        SendToService(new PipeMessage { Type = PipeMessageType.WindowResurrected, ProcessId = appId });
+
     /// <summary>Service'ten gelen mesajları sürekli dinler.</summary>
     private async Task ListenLoop(CancellationToken ct)
     {

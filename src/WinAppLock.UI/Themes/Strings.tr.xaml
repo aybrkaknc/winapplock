@@ -112,4 +112,40 @@
     <sys:String x:Key="Str_Saved">✓  Kaydedildi!</sys:String>
     <sys:String x:Key="Str_ChangePasswordSoon">Şifre değiştirme özelliği yakında eklenecek.</sys:String>
 
+    <!-- SetupWizard Code-Behind -->
+    <sys:String x:Key="Str_Copied">✓  Kopyalandı!</sys:String>
+    <sys:String x:Key="Str_PasswordEmpty">Şifre boş olamaz.</sys:String>
+    <sys:String x:Key="Str_PasswordMismatch">Şifreler eşleşmiyor.</sys:String>
+    <sys:String x:Key="Str_MasterPinSet">Master PIN Belirle ({0} Hane)</sys:String>
+    <sys:String x:Key="Str_MasterPinSetDesc">Bu PIN'i her kilitli uygulamayı açmak için kullanacaksın.</sys:String>
+    <sys:String x:Key="Str_MasterPasswordSet">Master Şifre Belirle</sys:String>
+    <sys:String x:Key="Str_MasterPasswordSetDesc">Bu şifreyi her kilitli uygulamayı açmak için kullanacaksın.</sys:String>
+    <sys:String x:Key="Str_StepFormat">Adım {0}/{1} — {2}</sys:String>
+    <sys:String x:Key="Str_Step1Name">Hoş Geldin</sys:String>
+    <sys:String x:Key="Str_Step2Name">Kilit Yöntemi</sys:String>
+    <sys:String x:Key="Str_Step3Name">Şifre Belirle</sys:String>
+    <sys:String x:Key="Str_Step4Name">Kurtarma Anahtarı</sys:String>
+    <sys:String x:Key="Str_Step5Name">Güvenlik Sorusu</sys:String>
+
+    <!-- App.xaml.cs -->
+    <sys:String x:Key="Str_AlreadyRunning">WinAppLock zaten çalışıyor!</sys:String>
+    <sys:String x:Key="Str_UnexpectedError">Beklenmeyen bir hata oluştu:</sys:String>
+    <sys:String x:Key="Str_TrayAllLocked">Tüm uygulamalar kilitlendi! 🔐</sys:String>
+    <sys:String x:Key="Str_UnknownApp">Bilinmeyen Uygulama</sys:String>
+
+    <!-- LockOverlay XAML -->
+    <sys:String x:Key="Str_OverlayTitle">WinAppLock - Doğrulama</sys:String>
+    <sys:String x:Key="Str_DefaultPrompt">Bu uygulama kilitli. Devam etmek için şifreni gir.</sys:String>
+
+    <!-- MainWindow Tooltip'ler -->
+    <sys:String x:Key="Str_ToolTipMinimize">Küçült</sys:String>
+    <sys:String x:Key="Str_ToolTipClose">System Tray'e Küçült</sys:String>
+    <sys:String x:Key="Str_ToolTipAddApp">Yeni bir uygulamayı kilitle</sys:String>
+
+    <!-- TrayIconService -->
+    <sys:String x:Key="Str_TrayTooltip">WinAppLock — Uygulamalar korunuyor</sys:String>
+    <sys:String x:Key="Str_TrayOpen">WinAppLock'u Aç</sys:String>
+    <sys:String x:Key="Str_TrayLockAll">🔐 Tümünü Kilitle</sys:String>
+    <sys:String x:Key="Str_TrayExit">Çıkış</sys:String>
+
 </ResourceDictionary>
