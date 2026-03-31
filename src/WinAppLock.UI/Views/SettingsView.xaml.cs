@@ -35,20 +35,11 @@ public partial class SettingsView : UserControl
     /// <summary>Mevcut ayarları UI kontrollerine yükler.</summary>
     private void LoadSettings()
     {
-        // Güvenlik Ayarları
         TxtMaxAttempts.Text = _settings.MaxAttempts.ToString();
         TxtCooldown.Text = _settings.CooldownSeconds.ToString();
-
-        // Görünüm (Retro) Ayarları
-        ComboThemeBase.SelectedIndex = (int)_settings.ThemeBase;
-        ComboNavStyle.SelectedIndex = (int)_settings.NavigationStyle;
-        ComboAnimations.SelectedIndex = (int)_settings.AnimationStyle;
-        ComboTitleGradient.SelectedIndex = (int)_settings.TitleBarGradient;
-        ComboIconSet.SelectedIndex = (int)_settings.IconSet;
-        CheckSoundEffects.IsChecked = _settings.SoundEnabled;
-
-        // Genel Ayarlar
-        CheckStartWithWindows.IsChecked = _settings.StartWithWindows;
+        TxtUiTimeout.Text = _settings.UiTimeoutSeconds.ToString();
+        ToggleSoundEnabled.IsChecked = _settings.SoundEnabled;
+        ToggleStartWithWindows.IsChecked = _settings.StartWithWindows;
         ComboLanguage.SelectedIndex = _settings.Language == "en" ? 1 : 0;
     }
 
@@ -61,22 +52,17 @@ public partial class SettingsView : UserControl
         if (int.TryParse(TxtCooldown.Text, out var cooldown) && cooldown > 0)
             _settings.CooldownSeconds = cooldown;
 
-        // Görünüm (Retro) Ayarları
-        _settings.ThemeBase = (ThemeBase)ComboThemeBase.SelectedIndex;
-        _settings.NavigationStyle = (NavigationStyle)ComboNavStyle.SelectedIndex;
-        _settings.AnimationStyle = (AnimationStyle)ComboAnimations.SelectedIndex;
-        _settings.TitleBarGradient = (GradientStyle)ComboTitleGradient.SelectedIndex;
-        _settings.IconSet = (IconSet)ComboIconSet.SelectedIndex;
-        _settings.SoundEnabled = CheckSoundEffects.IsChecked == true;
+        if (int.TryParse(TxtUiTimeout.Text, out var timeout) && timeout > 0)
+            _settings.UiTimeoutSeconds = timeout;
 
-        // Genel Ayarlar
-        _settings.StartWithWindows = CheckStartWithWindows.IsChecked == true;
+        _settings.SoundEnabled = ToggleSoundEnabled.IsChecked == true;
+        _settings.StartWithWindows = ToggleStartWithWindows.IsChecked == true;
         _settings.Language = ComboLanguage.SelectedIndex == 1 ? "en" : "tr";
 
         _database.SaveSettings(_settings);
 
         // Kaydedildi bildirimi
-        BtnSaveSettings.Content = "Uygulandı";
+        BtnSaveSettings.Content = L("Str_Saved", "✓  Kaydedildi!");
 
         // 2 saniye sonra eski metne dön
         var timer = new System.Windows.Threading.DispatcherTimer
@@ -85,7 +71,7 @@ public partial class SettingsView : UserControl
         };
         timer.Tick += (_, _) =>
         {
-            BtnSaveSettings.Content = "Uygula";
+            BtnSaveSettings.Content = L("Str_BtnSaveSettings", "💾  Ayarları Kaydet");
             timer.Stop();
         };
         timer.Start();

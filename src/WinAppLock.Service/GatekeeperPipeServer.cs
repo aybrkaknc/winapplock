@@ -47,8 +47,8 @@ public class GatekeeperPipeServer : IDisposable
     /// </summary>
     private readonly ConcurrentDictionary<string, DateTime> _authCache = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>Başarılı şifre girişinden sonra çoklu işlemler için tanınan şifresiz geçiş süresi (10 saniye).</summary>
-    private static readonly TimeSpan AUTH_GRACE_PERIOD = TimeSpan.FromSeconds(10);
+    /// <summary>Başarılı şifre girişinden sonra çoklu işlemler için tanınan şifresiz geçiş süresi (30 saniye).</summary>
+    private static readonly TimeSpan AUTH_GRACE_PERIOD = TimeSpan.FromSeconds(30);
 
     public GatekeeperPipeServer(AppDatabase database, PipeServer uiPipeServer)
     {

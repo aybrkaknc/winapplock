@@ -2,10 +2,10 @@ namespace WinAppLock.Core.Models;
 
 /// <summary>
 /// Uygulama ayarlarını temsil eden model.
+/// Veritabanında saklanır, kullanıcı tarafından düzenlenebilir.
 /// </summary>
 public class AppSettings
 {
-    // --- Mevcut Güvenlik Ayarları ---
     /// <summary>Seçilen kimlik doğrulama yöntemi (PIN veya Şifre).</summary>
     public AuthMethod AuthMethod { get; set; } = AuthMethod.Pin;
 
@@ -51,36 +51,4 @@ public class AppSettings
 
     /// <summary>Güvenlik sorusu cevabının hash'i (opsiyonel).</summary>
     public string? SecurityAnswerHash { get; set; }
-
-    // --- Modern-Retro Tema Ayarları ---
-
-    /// <summary>Temel tema seçimi.</summary>
-    public ThemeBase ThemeBase { get; set; } = ThemeBase.DarkRetro;
-
-    /// <summary>Ana navigasyon stili.</summary>
-    public NavigationStyle NavigationStyle { get; set; } = NavigationStyle.Tabbed;
-
-    /// <summary>Pencere ve bileşen animasyon stili.</summary>
-    public AnimationStyle AnimationStyle { get; set; } = AnimationStyle.Instant;
-
-    /// <summary>Başlık çubuğu gradyan stili.</summary>
-    public GradientStyle TitleBarGradient { get; set; } = GradientStyle.Smooth;
-
-    /// <summary>İkon seti seçimi.</summary>
-    public IconSet IconSet { get; set; } = IconSet.Original98;
 }
-
-/// <summary>Tema temel tipi.</summary>
-public enum ThemeBase { ClassicLight, DarkRetro }
-
-/// <summary>Navigasyon tipi.</summary>
-public enum NavigationStyle { Sidebar, Tabbed }
-
-/// <summary>Animasyon tipi.</summary>
-public enum AnimationStyle { Instant, Smooth }
-
-/// <summary>Gradyan tipi.</summary>
-public enum GradientStyle { Classic8Bit, Smooth }
-
-/// <summary>İkon seti.</summary>
-public enum IconSet { Original98, Modernized }

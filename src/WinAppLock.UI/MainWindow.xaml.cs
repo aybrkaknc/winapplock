@@ -2,8 +2,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using WinAppLock.Core.Data;
 using WinAppLock.Core.Identification;
@@ -84,8 +82,22 @@ public partial class MainWindow : Window
     }
 
     // ═══════════════════════════════════════
-    // Navigasyon (TabControl tarafından yönetilir)
+    // Navigasyon
     // ═══════════════════════════════════════
+
+    /// <summary>Dashboard sayfasını göster.</summary>
+    private void BtnNavDashboard_Click(object sender, RoutedEventArgs e)
+    {
+        DashboardContent.Visibility = Visibility.Visible;
+        SettingsContent.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>Ayarlar sayfasını göster.</summary>
+    private void BtnNavSettings_Click(object sender, RoutedEventArgs e)
+    {
+        DashboardContent.Visibility = Visibility.Collapsed;
+        SettingsContent.Visibility = Visibility.Visible;
+    }
 
     // ═══════════════════════════════════════
     // Uygulama Ekleme
@@ -227,7 +239,7 @@ public partial class MainWindow : Window
             : Visibility.Collapsed;
 
         // Başlık alt metnini güncelle
-        RunAppCountValue.Text = apps.Count.ToString();
+        RunAppCount.Text = apps.Count.ToString();
 
         // Kartları oluştur
         foreach (var app in apps)
@@ -245,15 +257,13 @@ public partial class MainWindow : Window
     private Border CreateAppCard(LockedApp app)
     {
         // ─── İkon ───
-        UIElement iconElement = new System.Windows.Controls.Image
+        var iconElement = new TextBlock
         {
-            Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Assets/Icons/computer.png")),
-            Width = 32,
-            Height = 32,
+            Text = "📦",
+            FontSize = 28,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 12, 0)
         };
-        RenderOptions.SetBitmapScalingMode(iconElement, BitmapScalingMode.NearestNeighbor);
 
         // Base64 ikon varsa Image kontrolü kullan
         if (!string.IsNullOrEmpty(app.IconBase64))
@@ -298,20 +308,20 @@ public partial class MainWindow : Window
         var nameText = new System.Windows.Controls.TextBlock
         {
             Text = app.DisplayName,
-            Foreground = System.Windows.Media.Brushes.Black,
-            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontRetro"),
-            FontSize = (double)FindResource("FontSizeTitle"),
-            FontWeight = FontWeights.Bold
+            Foreground = (System.Windows.Media.Brush)FindResource("BrushTextPrimary"),
+            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontPrimary"),
+            FontSize = (double)FindResource("FontSizeMD"),
+            FontWeight = FontWeights.SemiBold
         };
 
         var pathText = new System.Windows.Controls.TextBlock
         {
             Text = app.Identity.ExecutablePath,
-            Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(85, 85, 85)),
-            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontRetro"),
-            FontSize = (double)FindResource("FontSizeNormal"),
+            Foreground = (System.Windows.Media.Brush)FindResource("BrushTextMuted"),
+            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontPrimary"),
+            FontSize = (double)FindResource("FontSizeXS"),
             TextTrimming = TextTrimming.CharacterEllipsis,
-            MaxWidth = 450
+            MaxWidth = 350
         };
 
         var infoStack = new StackPanel();
@@ -331,47 +341,40 @@ public partial class MainWindow : Window
         toggle.Checked += (_, _) => ToggleAppLock(app.Id, true);
         toggle.Unchecked += (_, _) => ToggleAppLock(app.Id, false);
 
-        // ─── Sil Butonu (Retro) ───
+        // ─── Sil Butonu ───
         var deleteBtn = new Button
         {
-            Content = "r", // Marlett sembolü ile 'X' kapatma simgesi
-            FontFamily = new System.Windows.Media.FontFamily("Marlett"),
-            FontSize = 10,
+            Content = "🗑",
             Style = (Style)FindResource("BtnIcon"),
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 8, 0),
             ToolTip = L("Str_RemoveLock", "Kilidi kaldır")
         };
+        deleteBtn.Tag = app.Id;
         deleteBtn.Click += (_, _) => RemoveApp(app.Id, app.DisplayName);
 
-        // ─── Sağ Taraf Panel (Toggle + Delete) ───
-        var rightPanel = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal };
-        rightPanel.Children.Add(toggle);
-        rightPanel.Children.Add(deleteBtn);
-
-        // ─── Ana Kart Düzeni ───
-        var mainGrid = new Grid { Margin = new Thickness(4) };
-        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(40) }); // İkon
-        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Bilgi
-        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // Kontroller
+        // ─── Layout ───
+        var contentGrid = new Grid();
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
         Grid.SetColumn(iconElement, 0);
         Grid.SetColumn(infoStack, 1);
-        Grid.SetColumn(rightPanel, 2);
+        Grid.SetColumn(toggle, 2);
+        Grid.SetColumn(deleteBtn, 3);
 
-        mainGrid.Children.Add(iconElement);
-        mainGrid.Children.Add(infoStack);
-        mainGrid.Children.Add(rightPanel);
+        contentGrid.Children.Add(iconElement);
+        contentGrid.Children.Add(infoStack);
+        contentGrid.Children.Add(toggle);
+        contentGrid.Children.Add(deleteBtn);
 
-        // ─── Kart Border (Win98 Sunken Style) ───
+        // ─── Kart Border ───
         var card = new Border
         {
-            Background = System.Windows.Media.Brushes.White,
-            BorderThickness = new Thickness(1),
-            BorderBrush = (System.Windows.Media.Brush)FindResource("BrushRetroShadow"),
-            Margin = new Thickness(0, 0, 0, 4),
-            Padding = new Thickness(6, 4, 6, 4),
-            Child = mainGrid
+            Style = (Style)FindResource("CardPanel"),
+            Margin = new Thickness(0, 0, 0, 8),
+            Child = contentGrid
         };
 
         return card;

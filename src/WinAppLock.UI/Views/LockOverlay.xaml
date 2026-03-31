@@ -1,7 +1,7 @@
 <Window x:Class="WinAppLock.UI.Views.LockOverlay"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WinAppLock Login"
+        Title="{DynamicResource Str_OverlayTitle}"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -9,126 +9,242 @@
         ShowInTaskbar="False"
         WindowState="Maximized"
         ResizeMode="NoResize"
-        KeyDown="Window_KeyDown"
-        UseLayoutRounding="True"
-        SnapsToDevicePixels="True">
+        KeyDown="Window_KeyDown">
+
+    <!-- 
+    ═══════════════════════════════════════════════════
+    LockOverlay: Tüm ekranı kaplayan şifre giriş ekranı.
+    Kilitli uygulama algılandığında Service tarafından tetiklenir.
+    
+    Yapı:
+    - Yarı-saydam koyu arkaplan (karartma efekti)
+    - Ortada şifre giriş kartı
+    - Fade-in + scale animasyonu (~200ms)
+    ═══════════════════════════════════════════════════
+    -->
+
+    <Window.Resources>
+        <!-- Giriş animasyonu -->
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetName="OverlayBackground"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="AuthCardScale"
+                             Storyboard.TargetProperty="ScaleX"
+                             From="0.9" To="1" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="AuthCardScale"
+                             Storyboard.TargetProperty="ScaleY"
+                             From="0.9" To="1" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Hata titreşim animasyonu -->
+        <Storyboard x:Key="ShakeAnimation">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="AuthCardTranslate"
+                                            Storyboard.TargetProperty="X">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.05" Value="10" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="-10" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="8" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="-8" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="4" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Başarı animasyonu (yeşil parlama) -->
+        <Storyboard x:Key="SuccessAnimation">
+            <ColorAnimation Storyboard.TargetName="AuthCardBorder"
+                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                            To="{StaticResource StatusSuccess}"
+                            Duration="0:0:0.3" />
+            <DoubleAnimation Storyboard.TargetName="OverlayBackground"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.4"
+                             BeginTime="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Window.Resources>
 
     <!-- ─── Tam Ekran Karartma Arkaplanı ─── -->
-    <Grid x:Name="OverlayBackground">
+    <Grid x:Name="OverlayBackground" Opacity="0">
         <Grid.Background>
-            <SolidColorBrush Color="#000000" Opacity="0.5" />
+            <SolidColorBrush Color="#000000" Opacity="0.85" />
         </Grid.Background>
 
-        <!-- ─── Merkez Auth Dialog Box (Windows 98 Style) ─── -->
+        <!-- ─── Merkez Auth Kartı ─── -->
         <Border x:Name="AuthCardBorder"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Width="320"
-                Background="{StaticResource BrushRetroFace}"
-                BorderThickness="2"
-                BorderBrush="{StaticResource BrushRetroHighlight}">
-            
-            <Border BorderThickness="1,1,2,2" BorderBrush="{StaticResource BrushRetroShadow}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <!-- Title Bar -->
-                        <RowDefinition Height="22" />
-                        <!-- Content Area -->
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+                Width="380"
+                Background="{StaticResource BrushBackgroundCard}"
+                BorderBrush="{StaticResource BrushBorderDefault}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusXLarge}"
+                Padding="32"
+                Effect="{StaticResource ShadowLarge}"
+                RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="AuthCardScale" ScaleX="1" ScaleY="1" />
+                    <TranslateTransform x:Name="AuthCardTranslate" X="0" />
+                </TransformGroup>
+            </Border.RenderTransform>
 
-                    <!-- Title Bar -->
-                    <Grid Grid.Row="0" Margin="2,2,2,0">
-                        <Grid.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="{StaticResource RetroTitleActiveStart}" Offset="0" />
-                                <GradientStop Color="{StaticResource RetroTitleActiveEnd}" Offset="1" />
-                            </LinearGradientBrush>
-                        </Grid.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Image Source="/Assets/Icons/lock.png" Width="16" Height="16" Margin="4,0,4,0" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                            <TextBlock Text="Application Locked" 
-                                     Foreground="White" 
-                                     FontFamily="{StaticResource FontRetro}" 
-                                     FontSize="{StaticResource FontSizeTitle}"
-                                     FontWeight="Bold"
-                                     VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Grid>
+            <StackPanel>
+                <!-- Uygulama İkonu + Adı -->
+                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,24">
+                    <Image x:Name="OverlayAppIcon"
+                           Width="48" Height="48"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,12" />
+                    <TextBlock x:Name="OverlayAppName"
+                               Text=""
+                               Foreground="{StaticResource BrushTextPrimary}"
+                               FontFamily="{StaticResource FontPrimary}"
+                               FontSize="{StaticResource FontSizeXL}"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center" />
+                    <TextBlock x:Name="OverlayPromptText"
+                               Text="{DynamicResource Str_DefaultPrompt}"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               FontFamily="{StaticResource FontPrimary}"
+                               FontSize="{StaticResource FontSizeS}"
+                               TextAlignment="Center"
+                               Margin="0,8,0,0"
+                               TextWrapping="Wrap" />
+                </StackPanel>
 
-                    <StackPanel Grid.Row="1" Margin="12">
-                        <!-- App Info Section -->
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="48" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Image x:Name="OverlayAppIcon" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
-                                <TextBlock x:Name="OverlayAppName" Foreground="Black" FontWeight="Bold" FontSize="{StaticResource FontSizeTitle}" />
-                                <TextBlock x:Name="OverlayPromptText" Foreground="Black" TextWrapping="Wrap" FontSize="{StaticResource FontSizeNormal}" />
-                            </StackPanel>
-                        </Grid>
-
-                        <Rectangle Height="1" Fill="{StaticResource BrushRetroShadow}" Margin="0,0,0,12" />
-
-                        <!-- PIN Giriş Alanı (Classic Keypad) -->
-                        <StackPanel x:Name="PinInputArea" Visibility="Visible">
-                            <Border Background="White" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" 
-                                    Height="28" Margin="0,0,0,12">
-                                <Border BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" SnapsToDevicePixels="True">
-                                    <!-- PIN Noktaları -->
-                                    <StackPanel x:Name="PinDotsPanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                            </Border>
-
-                            <Grid x:Name="PinPadGrid" HorizontalAlignment="Center">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Button x:Name="BtnPin1" Content="1" Grid.Row="0" Grid.Column="0" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin2" Content="2" Grid.Row="0" Grid.Column="1" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin3" Content="3" Grid.Row="0" Grid.Column="2" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin4" Content="4" Grid.Row="1" Grid.Column="0" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin5" Content="5" Grid.Row="1" Grid.Column="1" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin6" Content="6" Grid.Row="1" Grid.Column="2" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin7" Content="7" Grid.Row="2" Grid.Column="0" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin8" Content="8" Grid.Row="2" Grid.Column="1" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPin9" Content="9" Grid.Row="2" Grid.Column="2" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPinBackspace" Content="⌫" Grid.Row="3" Grid.Column="0" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="BtnPinBackspace_Click" />
-                                <Button x:Name="BtnPin0" Content="0" Grid.Row="3" Grid.Column="1" Style="{StaticResource BtnRetro}" Width="40" Height="32" Margin="2" Click="PinButton_Click" />
-                                <Button x:Name="BtnPinSubmit" Content="OK" Grid.Row="3" Grid.Column="2" Style="{StaticResource BtnRetro}" FontWeight="Bold" Width="40" Height="32" Margin="2" Click="BtnPinSubmit_Click" />
-                            </Grid>
-                        </StackPanel>
-
-                        <!-- Şifre Giriş Alanı -->
-                        <StackPanel x:Name="PasswordInputArea" Visibility="Collapsed">
-                            <Border Background="White" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Margin="0,0,0,10">
-                                <PasswordBox x:Name="OverlayPasswordBox" BorderThickness="0" Background="Transparent"
-                                             MaxLength="64" KeyDown="OverlayPasswordBox_KeyDown" Padding="4" />
-                            </Border>
-                            <Button x:Name="BtnPasswordSubmit" Content="Unlock" Style="{StaticResource BtnRetro}" FontWeight="Bold" Height="26" Click="BtnPasswordSubmit_Click" />
-                        </StackPanel>
-
-                        <TextBlock x:Name="OverlayStatusText" Foreground="Red" FontSize="10" TextAlignment="Center" Margin="0,6,0,0" TextWrapping="Wrap" />
-                        
-                        <!-- Footer Buttons -->
-                        <Grid Margin="0,16,0,0">
-                            <TextBlock x:Name="OverlayAttemptsText" VerticalAlignment="Center" Foreground="#444" FontSize="9" />
-                            <Button x:Name="BtnCancel" Content="İptal" HorizontalAlignment="Right" Style="{StaticResource BtnRetro}" Width="60" Height="22" Click="BtnCancel_Click" />
-                        </Grid>
+                <!-- ─── PIN Giriş Alanı ─── -->
+                <StackPanel x:Name="PinInputArea" Visibility="Visible">
+                    <!-- PIN Noktaları (görsel gösterim) -->
+                    <StackPanel x:Name="PinDotsPanel"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,20">
+                        <!-- Dinamik olarak doldurulur -->
                     </StackPanel>
-                </Grid>
-            </Border>
+
+                    <!-- Sayısal Tuş Takımı -->
+                    <Grid x:Name="PinPadGrid" HorizontalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Satır 1: 1 2 3 -->
+                        <Button x:Name="BtnPin1" Content="1" Grid.Row="0" Grid.Column="0"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPin2" Content="2" Grid.Row="0" Grid.Column="1"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPin3" Content="3" Grid.Row="0" Grid.Column="2"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+
+                        <!-- Satır 2: 4 5 6 -->
+                        <Button x:Name="BtnPin4" Content="4" Grid.Row="1" Grid.Column="0"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPin5" Content="5" Grid.Row="1" Grid.Column="1"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPin6" Content="6" Grid.Row="1" Grid.Column="2"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+
+                        <!-- Satır 3: 7 8 9 -->
+                        <Button x:Name="BtnPin7" Content="7" Grid.Row="2" Grid.Column="0"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPin8" Content="8" Grid.Row="2" Grid.Column="1"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPin9" Content="9" Grid.Row="2" Grid.Column="2"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+
+                        <!-- Satır 4: ← 0 ✓ -->
+                        <Button x:Name="BtnPinBackspace" Content="⌫" Grid.Row="3" Grid.Column="0"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="18" Click="BtnPinBackspace_Click" />
+                        <Button x:Name="BtnPin0" Content="0" Grid.Row="3" Grid.Column="1"
+                                Style="{StaticResource BtnSecondary}" Width="64" Height="52"
+                                Margin="4" FontSize="20" Click="PinButton_Click" />
+                        <Button x:Name="BtnPinSubmit" Content="✓" Grid.Row="3" Grid.Column="2"
+                                Style="{StaticResource BtnPrimary}" Width="64" Height="52"
+                                Margin="4" FontSize="18" Click="BtnPinSubmit_Click" />
+                    </Grid>
+                </StackPanel>
+
+                <!-- ─── Şifre Giriş Alanı (PIN yerine seçilebilir) ─── -->
+                <StackPanel x:Name="PasswordInputArea" Visibility="Collapsed">
+                    <PasswordBox x:Name="OverlayPasswordBox"
+                                 Style="{StaticResource InputPassword}"
+                                 MaxLength="64"
+                                 Margin="0,0,0,12"
+                                 KeyDown="OverlayPasswordBox_KeyDown" />
+                    <Button x:Name="BtnPasswordSubmit"
+                            Content="{DynamicResource Str_Unlock}"
+                            Style="{StaticResource BtnPrimary}"
+                            HorizontalAlignment="Stretch"
+                            Click="BtnPasswordSubmit_Click" />
+                </StackPanel>
+
+                <!-- ─── Hata / Durum Mesajı ─── -->
+                <TextBlock x:Name="OverlayStatusText"
+                           Text=""
+                           Foreground="{StaticResource BrushStatusError}"
+                           FontFamily="{StaticResource FontPrimary}"
+                           FontSize="{StaticResource FontSizeS}"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center" />
+
+                <!-- ─── Kalan Deneme ve Bekleme ─── -->
+                <TextBlock x:Name="OverlayAttemptsText"
+                           Text=""
+                           Foreground="{StaticResource BrushTextMuted}"
+                           FontFamily="{StaticResource FontPrimary}"
+                           FontSize="{StaticResource FontSizeXS}"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0" />
+
+                <!-- ─── İptal (Vazgeç) Butonu ─── -->
+                <Button x:Name="BtnCancel"
+                        Content="İptal Et (ESC)"
+                        Click="BtnCancel_Click"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Foreground="{StaticResource BrushTextMuted}"
+                        FontFamily="{StaticResource FontPrimary}"
+                        FontSize="{StaticResource FontSizeS}"
+                        HorizontalAlignment="Center"
+                        Margin="0,16,0,0"
+                        Cursor="Hand" />
+            </StackPanel>
         </Border>
     </Grid>
 </Window>

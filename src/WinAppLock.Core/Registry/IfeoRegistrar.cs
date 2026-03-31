@@ -1,5 +1,7 @@
 using Microsoft.Win32;
 using Serilog;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using WinAppLock.Core.Models;
 
 namespace WinAppLock.Core.Registry;
@@ -49,10 +51,20 @@ public static class IfeoRegistrar
 
         try
         {
-            using var key = Microsoft.Win32.Registry.LocalMachine.CreateSubKey($@"{IFEO_BASE_PATH}\{exeName}");
+            // RegistryKeyPermissionCheck ayarı ile okuma/yazma (ve dolayısıyla ACL atama) haklarını istiyoruz
+            using var key = Microsoft.Win32.Registry.LocalMachine.CreateSubKey(
+                $@"{IFEO_BASE_PATH}\{exeName}", 
+                RegistryKeyPermissionCheck.ReadWriteSubTree,
+                RegistryOptions.None);
+                
+            if (key == null) return false;
+
             key.SetValue("Debugger", $"\"{gatekeeperPath}\"", RegistryValueKind.String);
 
-            Log.Information("[IFEO] Kayıt yazıldı: {ExeName} → {GatekeeperPath}", exeName, gatekeeperPath);
+            // ACL Korumasını Aktifleştir
+            ApplyAclProtection(key, exeName);
+
+            Log.Information("[IFEO] Kayıt yazıldı ve korumaya alındı: {ExeName} → {GatekeeperPath}", exeName, gatekeeperPath);
             return true;
         }
         catch (UnauthorizedAccessException ex)
@@ -144,9 +156,19 @@ public static class IfeoRegistrar
     {
         try
         {
-            using var key = Microsoft.Win32.Registry.LocalMachine.CreateSubKey($@"{IFEO_BASE_PATH}\{exeName}");
+            using var key = Microsoft.Win32.Registry.LocalMachine.CreateSubKey(
+                $@"{IFEO_BASE_PATH}\{exeName}", 
+                RegistryKeyPermissionCheck.ReadWriteSubTree, 
+                RegistryOptions.None);
+                
+            if (key == null) return;
+            
             key.SetValue("Debugger", $"\"{gatekeeperPath}\"", RegistryValueKind.String);
-            Log.Debug("[IFEO] Kayıt geri eklendi: {ExeName}", exeName);
+            
+            // Geri yüklemelerde de ACL korumasını aktifleştir
+            ApplyAclProtection(key, exeName);
+            
+            Log.Debug("[IFEO] Kayıt geri eklendi ve korumaya alındı: {ExeName}", exeName);
         }
         catch (Exception ex)
         {
@@ -254,6 +276,53 @@ public static class IfeoRegistrar
         catch (Exception ex)
         {
             Log.Error(ex, "[IFEO] Toplu kayıt temizleme hatası.");
+        }
+    }
+
+    /// <summary>
+    /// Oluşturulan IFEO anahtarına ACL (Access Control List) politikasını uygular.
+    /// SYSTEM: Tam Denetim (Yazma/Silme)
+    /// Yöneticiler ve Kullanıcılar: Salt Okunur (Silme ve Değiştirme yasak)
+    /// </summary>
+    private static void ApplyAclProtection(RegistryKey key, string exeName)
+    {
+        try
+        {
+            var rs = key.GetAccessControl();
+            
+            // Üstteki klasörlerden gelen varsayılan mirasları (İzinleri) kes at.
+            rs.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+
+            // 1. SYSTEM HESABI (WinAppLock.Service olarak çalışıyor) -> TAM YETKİ
+            rs.AddAccessRule(new RegistryAccessRule(
+                new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
+                RegistryRights.FullControl,
+                InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                PropagationFlags.None,
+                AccessControlType.Allow));
+
+            // 2. ADMINISTRATORS (Yöneticiler) -> SADECE OKUMA YETKİSİ
+            rs.AddAccessRule(new RegistryAccessRule(
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                RegistryRights.ReadKey,
+                InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                PropagationFlags.None,
+                AccessControlType.Allow));
+
+            // 3. USERS (Tüm standart kullanıcılar) -> SADECE OKUMA YETKİSİ
+            rs.AddAccessRule(new RegistryAccessRule(
+                new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+                RegistryRights.ReadKey,
+                InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                PropagationFlags.None,
+                AccessControlType.Allow));
+
+            key.SetAccessControl(rs);
+            Log.Debug("[IFEO] ACL Koruması devrede: {ExeName}", exeName);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[IFEO] ACL Koruması uygulanamadı: {ExeName}. Güvenlik uyarısı!", exeName);
         }
     }
 }

@@ -9,7 +9,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>WinAppLock.UI</RootNamespace>
     <AssemblyName>WinAppLock.UI</AssemblyName>
-    <Version>0.0.103</Version>
+    <Version>0.0.104</Version>
     <!-- <ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon> -->
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -22,10 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WinAppLock.Core\WinAppLock.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Assets\Icons\*.png" />
   </ItemGroup>
 
 </Project>

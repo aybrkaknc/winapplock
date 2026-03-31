@@ -133,9 +133,12 @@ public partial class LockOverlay : Window
         Show();
     }
 
-    /// <summary>Pencere yüklendiğinde hazırlık.</summary>
+    /// <summary>Pencere yüklendiğinde giriş animasyonunu oynat.</summary>
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        var animation = (Storyboard)FindResource("FadeInAnimation");
+        animation.Begin();
+
         // Şifre modunda otomatik odaklan
         if (_settings.AuthMethod == AuthMethod.Password)
         {
@@ -155,11 +158,11 @@ public partial class LockOverlay : Window
         {
             var dot = new Ellipse
             {
-                Width = 10,
-                Height = 10,
-                Margin = new Thickness(4, 0, 4, 0),
-                Fill = Brushes.Transparent,
-                Stroke = (Brush)FindResource("BrushRetroShadow"),
+                Width = 14,
+                Height = 14,
+                Margin = new Thickness(6, 0, 6, 0),
+                Fill = (Brush)FindResource("BrushBackgroundLight"),
+                Stroke = (Brush)FindResource("BrushBorderDefault"),
                 StrokeThickness = 1
             };
             PinDotsPanel.Children.Add(dot);
@@ -174,8 +177,8 @@ public partial class LockOverlay : Window
             if (PinDotsPanel.Children[i] is Ellipse dot)
             {
                 dot.Fill = i < _currentPin.Length
-                    ? Brushes.Black
-                    : Brushes.Transparent;
+                    ? (Brush)FindResource("BrushAccentPrimary")
+                    : (Brush)FindResource("BrushBackgroundLight");
             }
         }
     }
@@ -285,7 +288,7 @@ public partial class LockOverlay : Window
         Close();
     }
 
-    /// <summary>Başarılı doğrulama: Hemen kapat.</summary>
+    /// <summary>Başarılı doğrulama: animasyon oynat ve overlay'i kapat.</summary>
     private void OnAuthenticationSuccess()
     {
         _database.LogAccessAttempt(_appName, true);
@@ -296,11 +299,17 @@ public partial class LockOverlay : Window
             SystemSounds.Beep.Play();
         }
 
-        AuthSuccess?.Invoke(_processId);
-        Close();
+        // Başarı animasyonu sonrası pencereyi kapat
+        var animation = (Storyboard)FindResource("SuccessAnimation");
+        animation.Completed += (_, _) =>
+        {
+            AuthSuccess?.Invoke(_processId);
+            Close();
+        };
+        animation.Begin();
     }
 
-    /// <summary>Başarısız doğrulama: Hata mesajı + deneme sayacı.</summary>
+    /// <summary>Başarısız doğrulama: titreşim + hata mesajı + deneme sayacı.</summary>
     private void OnAuthenticationFailed()
     {
         _failedAttempts++;
@@ -316,6 +325,10 @@ public partial class LockOverlay : Window
         _currentPin = string.Empty;
         UpdatePinDots();
         OverlayPasswordBox.Password = string.Empty;
+
+        // Titreşim animasyonu
+        var shake = (Storyboard)FindResource("ShakeAnimation");
+        shake.Begin();
 
         // Kalan deneme hesapla
         var remaining = _settings.MaxAttempts - _failedAttempts;
