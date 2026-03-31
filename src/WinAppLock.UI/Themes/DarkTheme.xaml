@@ -142,6 +142,10 @@
                             <Setter TargetName="TabBorder" Property="Margin" Value="-2,-2,-2,-1" />
                             <Setter TargetName="TabBorder" Property="Padding" Value="14,6" />
                             <Setter Property="Panel.ZIndex" Value="10" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -149,8 +153,9 @@
         </Setter>
     </Style>
 
-    <!-- ─── ICON BUTTON STİLİ (Win98 Style) ─── -->
+    <!-- ─── ICON BUTTON STİLİ (Win98 Style - Light Grey for contrast) ─── -->
     <Style x:Key="BtnIcon" TargetType="Button" BasedOn="{StaticResource BtnRetro}">
+        <Setter Property="Background" Value="#C0C0C0" />
         <Setter Property="Padding" Value="2" />
         <Setter Property="MinWidth" Value="24" />
         <Setter Property="Height" Value="24" />

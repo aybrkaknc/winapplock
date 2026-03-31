@@ -40,8 +40,8 @@
                         </LinearGradientBrush>
                     </Grid.Background>
 
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="/Assets/Icons/lock.png" Width="16" Height="16" Margin="4,0,4,0" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Assets/Icons/lock.png" Width="16" Height="16" Margin="4,0,6,0" RenderOptions.BitmapScalingMode="NearestNeighbor" />
                         <TextBlock Text="WinAppLock" 
                                    Foreground="White" 
                                    FontFamily="{StaticResource FontRetro}" 
@@ -115,10 +115,6 @@
                         </ScrollViewer>
                     </TabItem>
 
-                    <!-- 3. LOGLAR (İleride Eklenecek) -->
-                    <TabItem Header="{DynamicResource Str_History}" IsEnabled="False">
-                        <TextBlock Text="Access history logging coming soon in v0.0.103" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#888" />
-                    </TabItem>
                 </TabControl>
 
                 <!-- ─── Status Bar ─── -->
@@ -137,7 +133,7 @@
                         </Border>
 
                         <Border Grid.Column="1" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Padding="4,1" Margin="4,0,0,0" Width="100">
-                            <TextBlock Text="v0.0.103.2" FontSize="10" HorizontalAlignment="Center" />
+                            <TextBlock Text="v0.0.104" FontSize="10" HorizontalAlignment="Center" />
                         </Border>
                     </Grid>
                 </Border>

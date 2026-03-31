@@ -331,33 +331,37 @@ public partial class MainWindow : Window
         toggle.Checked += (_, _) => ToggleAppLock(app.Id, true);
         toggle.Unchecked += (_, _) => ToggleAppLock(app.Id, false);
 
-        // ─── Sil Butonu ───
+        // ─── Sil Butonu (Retro) ───
         var deleteBtn = new Button
         {
-            Content = "🗑",
+            Content = "r", // Marlett sembolü ile 'X' kapatma simgesi
+            FontFamily = new System.Windows.Media.FontFamily("Marlett"),
+            FontSize = 10,
             Style = (Style)FindResource("BtnIcon"),
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 8, 0),
             ToolTip = L("Str_RemoveLock", "Kilidi kaldır")
         };
-        deleteBtn.Tag = app.Id;
         deleteBtn.Click += (_, _) => RemoveApp(app.Id, app.DisplayName);
 
-        // ─── Layout ───
-        var contentGrid = new Grid();
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        // ─── Sağ Taraf Panel (Toggle + Delete) ───
+        var rightPanel = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal };
+        rightPanel.Children.Add(toggle);
+        rightPanel.Children.Add(deleteBtn);
+
+        // ─── Ana Kart Düzeni ───
+        var mainGrid = new Grid { Margin = new Thickness(4) };
+        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(40) }); // İkon
+        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Bilgi
+        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // Kontroller
 
         Grid.SetColumn(iconElement, 0);
         Grid.SetColumn(infoStack, 1);
-        Grid.SetColumn(toggle, 2);
-        Grid.SetColumn(deleteBtn, 3);
+        Grid.SetColumn(rightPanel, 2);
 
-        contentGrid.Children.Add(iconElement);
-        contentGrid.Children.Add(infoStack);
-        contentGrid.Children.Add(toggle);
-        contentGrid.Children.Add(deleteBtn);
+        mainGrid.Children.Add(iconElement);
+        mainGrid.Children.Add(infoStack);
+        mainGrid.Children.Add(rightPanel);
 
         // ─── Kart Border (Win98 Sunken Style) ───
         var card = new Border
@@ -367,7 +371,7 @@ public partial class MainWindow : Window
             BorderBrush = (System.Windows.Media.Brush)FindResource("BrushRetroShadow"),
             Margin = new Thickness(0, 0, 0, 4),
             Padding = new Thickness(6, 4, 6, 4),
-            Child = contentGrid
+            Child = mainGrid
         };
 
         return card;
