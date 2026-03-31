@@ -149,4 +149,47 @@
         </Setter>
     </Style>
 
+    <!-- ─── ICON BUTTON STİLİ (Win98 Style) ─── -->
+    <Style x:Key="BtnIcon" TargetType="Button" BasedOn="{StaticResource BtnRetro}">
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="MinWidth" Value="24" />
+        <Setter Property="Height" Value="24" />
+    </Style>
+
+    <!-- ─── TOGGLESWITCH (Win98 CheckBox Style for ToggleButton) ─── -->
+    <Style x:Key="ToggleSwitch" TargetType="ToggleButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!-- Check Box (Sunken) -->
+                        <Border x:Name="Box" Grid.Column="0" Width="13" Height="13"
+                                Background="White" BorderThickness="1" SnapsToDevicePixels="True">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="{StaticResource RetroShadow}" />
+                            </Border.BorderBrush>
+                            <TextBlock x:Name="CheckMark" Text="✓" Foreground="Black" 
+                                       FontSize="10" FontWeight="Bold" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="Collapsed" Margin="0,-1,0,0" />
+                        </Border>
+                        <ContentPresenter Grid.Column="1" Margin="4,0,0,0" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Box" Property="Background" Value="{StaticResource BrushRetroFace}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

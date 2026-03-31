@@ -137,7 +137,7 @@
                         </Border>
 
                         <Border Grid.Column="1" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Padding="4,1" Margin="4,0,0,0" Width="100">
-                            <TextBlock Text="v0.0.103.1" FontSize="10" HorizontalAlignment="Center" />
+                            <TextBlock Text="v0.0.103.2" FontSize="10" HorizontalAlignment="Center" />
                         </Border>
                     </Grid>
                 </Border>
