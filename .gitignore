@@ -62,3 +62,9 @@ TestResult.xml
 
 # Publish
 publish/
+
+# WinAppLock Specific Logs/Docs
+build.log
+build_output.txt
+err.txt
+*.log
