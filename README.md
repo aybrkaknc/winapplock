@@ -12,7 +12,8 @@ A free and open-source (GPLv3) Windows application that restricts access to spec
 - **Multiple Auth Methods** — Secure your apps with a 4-8 digit PIN or an alphanumeric password, hashed using the industry-standard **Argon2id**.
 - **Real-Time Health Guard** — The background Service periodically verifies IFEO registry integrity and repairs any missing or tampered protection keys (Anti-Tamper).
 - **Global Hotkey** — Instantly lock all protected applications using `Ctrl+Alt+L`.
-- **System Tray & Bilingaul UI** — Modern WPF dashboard with dark theme support and instant Turkish/English switching.
+- **"Dark Retro" Windows 98 Aesthetic** — Pixel-perfect recreation of the classic Windows 98 UI, featuring 3D bevel (Sunken/Raised) effects, Tahoma typography (Hi-DPI optimized), and original 8-bit icons.
+- **Dynamic Theme Engine** — Fully customizable UI including Title Bar gradients (8-bit vs Smooth), navigation styles (Classic Tabs vs Modern Sidebar), and instant animation toggles.
 
 ---
 
@@ -22,8 +23,8 @@ WinAppLock uses a **4-tier architecture** for robust security and performance:
 
 ```
 ┌───────────────────────────────────────────────────────┐
-│ WinAppLock.UI (WPF)                                   │
-│ Dashboard · Settings · SetupWizard · LockOverlay      │
+│ WinAppLock.UI (WPF) - "Dark Retro" Edition            │
+│ Tabbed Property Sheets · Retro Settings · LockOverlay │
 └───────────┬───────────────────────────────────────────┘
             │ Pipe (IPC)
 ┌───────────▼───────────────────────────────────────────┐
@@ -39,7 +40,7 @@ WinAppLock uses a **4-tier architecture** for robust security and performance:
                                       │ Refers to
 ┌─────────────────────────────────────▼─────────────────┐
 │ WinAppLock.Core (Shared Library)                      │
-│ Models · Argon2id Security · AppIdentifier (SHA256)   │
+│ Models (v0.0.103) · Argon2id Security · AppIdentifier │
 │ AppDatabase (SQLite) · IPC Message Contracts          │
 └───────────────────────────────────────────────────────┘
 ```

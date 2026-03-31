@@ -2,6 +2,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using WinAppLock.Core.Data;
 using WinAppLock.Core.Identification;
@@ -82,22 +84,8 @@ public partial class MainWindow : Window
     }
 
     // ═══════════════════════════════════════
-    // Navigasyon
+    // Navigasyon (TabControl tarafından yönetilir)
     // ═══════════════════════════════════════
-
-    /// <summary>Dashboard sayfasını göster.</summary>
-    private void BtnNavDashboard_Click(object sender, RoutedEventArgs e)
-    {
-        DashboardContent.Visibility = Visibility.Visible;
-        SettingsContent.Visibility = Visibility.Collapsed;
-    }
-
-    /// <summary>Ayarlar sayfasını göster.</summary>
-    private void BtnNavSettings_Click(object sender, RoutedEventArgs e)
-    {
-        DashboardContent.Visibility = Visibility.Collapsed;
-        SettingsContent.Visibility = Visibility.Visible;
-    }
 
     // ═══════════════════════════════════════
     // Uygulama Ekleme
@@ -239,7 +227,7 @@ public partial class MainWindow : Window
             : Visibility.Collapsed;
 
         // Başlık alt metnini güncelle
-        RunAppCount.Text = apps.Count.ToString();
+        RunAppCountValue.Text = apps.Count.ToString();
 
         // Kartları oluştur
         foreach (var app in apps)
@@ -257,13 +245,15 @@ public partial class MainWindow : Window
     private Border CreateAppCard(LockedApp app)
     {
         // ─── İkon ───
-        var iconElement = new TextBlock
+        UIElement iconElement = new System.Windows.Controls.Image
         {
-            Text = "📦",
-            FontSize = 28,
+            Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Assets/Icons/computer.png")),
+            Width = 32,
+            Height = 32,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 12, 0)
         };
+        RenderOptions.SetBitmapScalingMode(iconElement, BitmapScalingMode.NearestNeighbor);
 
         // Base64 ikon varsa Image kontrolü kullan
         if (!string.IsNullOrEmpty(app.IconBase64))
@@ -308,20 +298,20 @@ public partial class MainWindow : Window
         var nameText = new System.Windows.Controls.TextBlock
         {
             Text = app.DisplayName,
-            Foreground = (System.Windows.Media.Brush)FindResource("BrushTextPrimary"),
-            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontPrimary"),
-            FontSize = (double)FindResource("FontSizeMD"),
-            FontWeight = FontWeights.SemiBold
+            Foreground = System.Windows.Media.Brushes.Black,
+            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontRetro"),
+            FontSize = (double)FindResource("FontSizeTitle"),
+            FontWeight = FontWeights.Bold
         };
 
         var pathText = new System.Windows.Controls.TextBlock
         {
             Text = app.Identity.ExecutablePath,
-            Foreground = (System.Windows.Media.Brush)FindResource("BrushTextMuted"),
-            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontPrimary"),
-            FontSize = (double)FindResource("FontSizeXS"),
+            Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(85, 85, 85)),
+            FontFamily = (System.Windows.Media.FontFamily)FindResource("FontRetro"),
+            FontSize = (double)FindResource("FontSizeNormal"),
             TextTrimming = TextTrimming.CharacterEllipsis,
-            MaxWidth = 350
+            MaxWidth = 450
         };
 
         var infoStack = new StackPanel();
@@ -369,11 +359,14 @@ public partial class MainWindow : Window
         contentGrid.Children.Add(toggle);
         contentGrid.Children.Add(deleteBtn);
 
-        // ─── Kart Border ───
+        // ─── Kart Border (Win98 Sunken Style) ───
         var card = new Border
         {
-            Style = (Style)FindResource("CardPanel"),
-            Margin = new Thickness(0, 0, 0, 8),
+            Background = System.Windows.Media.Brushes.White,
+            BorderThickness = new Thickness(1),
+            BorderBrush = (System.Windows.Media.Brush)FindResource("BrushRetroShadow"),
+            Margin = new Thickness(0, 0, 0, 4),
+            Padding = new Thickness(6, 4, 6, 4),
             Child = contentGrid
         };
 

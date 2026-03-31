@@ -3,240 +3,145 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:WinAppLock.UI.Views"
         Title="WinAppLock"
-        Width="900" Height="620"
-        MinWidth="750" MinHeight="500"
+        Width="800" Height="550"
+        MinWidth="700" MinHeight="450"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        ResizeMode="CanResizeWithGrip">
+        ResizeMode="NoResize"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
 
     <Border x:Name="WindowBorder"
-            Background="{StaticResource BrushBackgroundDarkest}"
-            CornerRadius="{StaticResource RadiusLarge}"
-            BorderBrush="{StaticResource BrushBorderDefault}"
-            BorderThickness="1"
+            Background="{StaticResource BrushRetroFace}"
+            BorderThickness="2"
+            BorderBrush="{StaticResource BrushRetroHighlight}"
             ClipToBounds="True">
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <!-- Başlık Çubuğu -->
-                <RowDefinition Height="44" />
-                <!-- Ana İçerik -->
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <Border BorderThickness="1,1,2,2" BorderBrush="{StaticResource BrushRetroShadow}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <!-- Başlık Çubuğu (Title Bar) -->
+                    <RowDefinition Height="26" />
+                    <!-- Ana İçerik (Tabs) -->
+                    <RowDefinition Height="*" />
+                    <!-- Status Bar (Bilgi) -->
+                    <RowDefinition Height="22" />
+                </Grid.RowDefinitions>
 
-            <!-- ═══════════════════════════════════════ -->
-            <!-- Title Bar Area                          -->
-            <!-- ═══════════════════════════════════════ -->
-            <Grid x:Name="TitleBar" Grid.Row="0"
-                  Background="{StaticResource BrushBackgroundDark}"
-                  MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <!-- ─── Title Bar (Windows 98 Style) ─── -->
+                <Grid x:Name="TitleBar" Grid.Row="0" Margin="2,2,2,0"
+                      MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="{StaticResource RetroTitleActiveStart}" Offset="0" />
+                            <GradientStop Color="{StaticResource RetroTitleActiveEnd}" Offset="1" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Icons/lock.png" Width="16" Height="16" Margin="4,0,4,0" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        <TextBlock Text="WinAppLock" 
+                                   Foreground="White" 
+                                   FontFamily="{StaticResource FontRetro}" 
+                                   FontSize="{StaticResource FontSizeTitle}"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
 
-                <!-- Logo ve Uygulama Adı -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal"
-                            Margin="16,0,0,0" VerticalAlignment="Center">
-                    <!-- Kilit ikonu (Unicode) -->
-                    <TextBlock x:Name="TitleBarIcon" Text="🔒"
-                               FontSize="16" Margin="0,0,8,0"
-                               VerticalAlignment="Center" />
-                    <TextBlock x:Name="TitleBarText" Text="WinAppLock"
-                               Foreground="{StaticResource BrushTextPrimary}"
-                               FontFamily="{StaticResource FontPrimary}"
-                               FontSize="{StaticResource FontSizeMD}"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center" />
-                    <TextBlock x:Name="TitleBarVersion" Text="v0.0.100"
-                               Foreground="{StaticResource BrushTextMuted}"
-                               FontFamily="{StaticResource FontPrimary}"
-                               FontSize="{StaticResource FontSizeXS}"
-                               Margin="8,0,0,0"
-                               VerticalAlignment="Center" />
-                </StackPanel>
+                    <!-- Windows 98 Pencere Butonları -->
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,2,2,2">
+                        <Button x:Name="BtnMinimize" Content="0" FontFamily="Marlett" FontSize="10"
+                                Style="{StaticResource BtnRetro}" Padding="4,0" Width="16" Height="14"
+                                Click="BtnMinimize_Click" Margin="0,0,2,0" />
+                        <Button x:Name="BtnClose" Content="r" FontFamily="Marlett" FontSize="10"
+                                Style="{StaticResource BtnRetro}" Padding="4,0" Width="16" Height="14"
+                                Click="BtnClose_Click" />
+                    </StackPanel>
+                </Grid>
 
-                <!-- Pencere Kontrolleri -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal"
-                            Margin="0,0,8,0" VerticalAlignment="Center">
-                    <Button x:Name="BtnMinimize" Content="─"
-                            Style="{StaticResource BtnIcon}"
-                            Click="BtnMinimize_Click"
-                            ToolTip="{DynamicResource Str_ToolTipMinimize}" />
-                    <Button x:Name="BtnClose" Content="✕"
-                            Style="{StaticResource BtnIcon}"
-                            Click="BtnClose_Click"
-                            ToolTip="{DynamicResource Str_ToolTipClose}" />
-                </StackPanel>
-            </Grid>
+                <!-- ─── Main Content (Retro Tabbed Layout) ─── -->
+                <TabControl Grid.Row="1" Style="{StaticResource RetroTabs}" Margin="4">
+                    
+                    <!-- 1. DASHBOARD -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Assets/Icons/computer.png" Width="16" Height="16" Margin="0,0,4,0" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                <TextBlock Text="{DynamicResource Str_TabDashboard}" />
+                            </StackPanel>
+                        </TabItem.Header>
+                        <Grid Background="{StaticResource BrushWindow}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-            <!-- ═══════════════════════════════════════ -->
-            <!-- Main Content Area                       -->
-            <!-- ═══════════════════════════════════════ -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <!-- Sol Menü -->
-                    <ColumnDefinition Width="200" />
-                    <!-- Ana İçerik -->
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- ─── Sidebar Menu ─── -->
-                <Border x:Name="SidebarPanel" Grid.Column="0"
-                        Background="{StaticResource BrushBackgroundDark}"
-                        BorderBrush="{StaticResource BrushDivider}"
-                        BorderThickness="0,0,1,0">
-
-                    <DockPanel LastChildFill="False">
-                        <!-- Menü Öğeleri (Üst) -->
-                        <StackPanel DockPanel.Dock="Top" Margin="8,12,8,0">
-                            <Button x:Name="BtnNavDashboard"
-                                    Content="{DynamicResource Str_Dashboard}"
-                                    Style="{StaticResource BtnSecondary}"
-                                    HorizontalContentAlignment="Left"
-                                    Margin="0,2" Padding="12,10"
-                                    Click="BtnNavDashboard_Click" />
-                            <Button x:Name="BtnNavSettings"
-                                    Content="{DynamicResource Str_Settings}"
-                                    Style="{StaticResource BtnSecondary}"
-                                    HorizontalContentAlignment="Left"
-                                    Margin="0,2" Padding="12,10"
-                                    Click="BtnNavSettings_Click" />
-                        </StackPanel>
-
-                        <!-- Alt Kısım: Durum ve LockAll -->
-                        <StackPanel DockPanel.Dock="Bottom" Margin="8,0,8,12">
-                            <!-- Servis Durum Göstergesi -->
-                            <Border x:Name="ServiceStatusPanel"
-                                    Background="{StaticResource BrushBackgroundMedium}"
-                                    CornerRadius="{StaticResource RadiusMedium}"
-                                    Padding="10,8" Margin="0,0,0,8">
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse x:Name="ServiceStatusDot"
-                                             Width="8" Height="8"
-                                             Fill="{StaticResource BrushStatusSuccess}"
-                                             Margin="0,0,8,0"
-                                             VerticalAlignment="Center" />
-                                    <TextBlock x:Name="ServiceStatusText"
-                                               Text="{DynamicResource Str_ServiceActive}"
-                                               Foreground="{StaticResource BrushTextSecondary}"
-                                               FontSize="{StaticResource FontSizeS}" />
-                                </StackPanel>
+                            <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{StaticResource BrushRetroShadow}" Margin="0,0,0,10" Padding="0,0,0,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{DynamicResource Str_LockedApps}" FontSize="{StaticResource FontSizeTitle}" FontWeight="Bold" Foreground="Black" />
+                                        <TextBlock x:Name="RunAppCountText" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="#555">
+                                            <Run Text="(" /><Run x:Name="RunAppCountValue" Text="0" /><Run Text=" " /><Run Text="{DynamicResource Str_AppCount}" /><Run Text=")" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Button x:Name="BtnAddApp" HorizontalAlignment="Right" Content="{DynamicResource Str_BtnAddApp}" Style="{StaticResource BtnRetro}" Click="BtnAddApp_Click" />
+                                </Grid>
                             </Border>
 
-                            <!-- Tümünü Kilitle Butonu -->
-                            <Button x:Name="BtnLockAll"
-                                    Style="{StaticResource BtnPrimary}"
-                                    HorizontalContentAlignment="Center"
-                                    Click="BtnLockAll_Click"
-                                    ToolTip="Ctrl+Alt+L">
-                                <TextBlock Text="{DynamicResource Str_LockAll}" />
-                            </Button>
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="AppListPanel" 
+                                            AllowDrop="True" Drop="AppListPanel_Drop" DragOver="AppListPanel_DragOver">
+                                    
+                                    <!-- Empty State (Win98 Style Help Box) -->
+                                    <Border x:Name="EmptyStatePanel" Visibility="Visible" Margin="40" Padding="20"
+                                            BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Background="White">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="🛡️" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                                            <TextBlock Text="{DynamicResource Str_EmptyStateTitle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Str_EmptyStateDesc}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </TabItem>
 
-                <!-- ─── Dashboard Content ─── -->
-                <Grid x:Name="DashboardContent" Grid.Column="1" Margin="24,16,24,16">
-                    <Grid.RowDefinitions>
-                        <!-- Header: Başlık + Ekle -->
-                        <RowDefinition Height="Auto" />
-                        <!-- App List -->
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+                    <!-- 2. AYARLAR -->
+                    <TabItem Header="{DynamicResource Str_Settings}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <local:SettingsView x:Name="SettingsViewControl" />
+                        </ScrollViewer>
+                    </TabItem>
 
-                    <!-- ─── Dashboard Header ─── -->
-                    <Grid x:Name="DashboardHeader" Grid.Row="0" Margin="0,0,0,16">
+                    <!-- 3. LOGLAR (İleride Eklenecek) -->
+                    <TabItem Header="{DynamicResource Str_History}" IsEnabled="False">
+                        <TextBlock Text="Access history logging coming soon in v0.0.103" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#888" />
+                    </TabItem>
+                </TabControl>
+
+                <!-- ─── Status Bar ─── -->
+                <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BrushRetroHighlight}">
+                    <Grid Background="{StaticResource BrushRetroFace}" Margin="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Padding="4,1">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="ServiceStatusDot" Width="8" Height="8" Fill="Green" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <TextBlock x:Name="ServiceStatusText" Text="{DynamicResource Str_ServiceActive}" FontSize="10" />
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="HeaderTitle" Text="{DynamicResource Str_LockedApps}"
-                                       Foreground="{StaticResource BrushTextPrimary}"
-                                       FontFamily="{StaticResource FontPrimary}"
-                                       FontSize="{StaticResource FontSizeXL}"
-                                       FontWeight="Bold" />
-                            <TextBlock x:Name="HeaderSubtitle"
-                                       Foreground="{StaticResource BrushTextSecondary}"
-                                       FontFamily="{StaticResource FontPrimary}"
-                                       FontSize="{StaticResource FontSizeS}"
-                                       Margin="0,4,0,0">
-                                <Run x:Name="RunAppCount" Text="0" Foreground="{StaticResource BrushAccentPrimary}"/>
-                                <Run Text=" "/>
-                                <Run Text="{DynamicResource Str_AppCount}"/>
-                            </TextBlock>
-                        </StackPanel>
-
-                        <Button x:Name="BtnAddApp" Grid.Column="1"
-                                Content="{DynamicResource Str_BtnAddApp}"
-                                Style="{StaticResource BtnPrimary}"
-                                Click="BtnAddApp_Click"
-                                ToolTip="{DynamicResource Str_ToolTipAddApp}" />
+                        <Border Grid.Column="1" BorderThickness="1" BorderBrush="{StaticResource BrushRetroShadow}" Padding="4,1" Margin="4,0,0,0" Width="100">
+                            <TextBlock Text="v0.0.102" FontSize="10" HorizontalAlignment="Center" />
+                        </Border>
                     </Grid>
-
-                    <!-- ─── Locked Apps List ─── -->
-                    <ScrollViewer Grid.Row="1"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="AppListPanel"
-                                    AllowDrop="True"
-                                    Drop="AppListPanel_Drop"
-                                    DragOver="AppListPanel_DragOver">
-
-                            <!-- ─── Empty State ─── -->
-                            <Border x:Name="EmptyStatePanel"
-                                    Visibility="Visible"
-                                    Style="{StaticResource CardPanel}"
-                                    Padding="40"
-                                    Margin="0,40,0,0"
-                                    HorizontalAlignment="Center">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock x:Name="EmptyStateIcon" Text="🛡️"
-                                               FontSize="48"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,16" />
-                                    <TextBlock x:Name="EmptyStateTitle"
-                                               Text="{DynamicResource Str_EmptyStateTitle}"
-                                               Foreground="{StaticResource BrushTextPrimary}"
-                                               FontFamily="{StaticResource FontPrimary}"
-                                               FontSize="{StaticResource FontSizeLG}"
-                                               FontWeight="SemiBold"
-                                               HorizontalAlignment="Center" />
-                                    <TextBlock x:Name="EmptyStateDescription"
-                                               Text="{DynamicResource Str_EmptyStateDesc}"
-                                               Foreground="{StaticResource BrushTextSecondary}"
-                                               FontFamily="{StaticResource FontPrimary}"
-                                               FontSize="{StaticResource FontSizeMD}"
-                                               TextAlignment="Center"
-                                               Margin="0,8,0,16"
-                                               LineHeight="22" />
-                                    <Button x:Name="BtnEmptyStateAdd"
-                                            Content="{DynamicResource Str_BtnEmptyAdd}"
-                                            Style="{StaticResource BtnPrimary}"
-                                            HorizontalAlignment="Center"
-                                            Click="BtnAddApp_Click" />
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Uygulama kartları buraya dinamik olarak eklenir -->
-
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-
-                <!-- ─── Settings Content (SettingsView UserControl) ─── -->
-                <Grid x:Name="SettingsContent" Grid.Column="1"
-                      Visibility="Collapsed" Margin="24,16,24,16">
-                    <local:SettingsView x:Name="SettingsViewControl" />
-                </Grid>
-
+                </Border>
             </Grid>
-        </Grid>
+        </Border>
     </Border>
 </Window>

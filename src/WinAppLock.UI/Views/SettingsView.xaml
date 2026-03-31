@@ -3,237 +3,133 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="Transparent">
 
-    <!--
-    ═══════════════════════════════════════════════════
-    SettingsView: Ayarlar sayfası.
-    MainWindow içinde DashboardContent yerine gösterilir.
-    ═══════════════════════════════════════════════════
-    -->
+    <Grid Margin="10">
+        <TabControl Style="{StaticResource RetroTabs}">
+            
+            <!-- ═══ 1. GÜVENLİK (Security) ═══ -->
+            <TabItem Header="{DynamicResource Str_Security}">
+                <StackPanel Margin="0,10,0,0">
+                    <GroupBox Header="{DynamicResource Str_ChangePasswordTitle}" Margin="0,0,0,10">
+                        <StackPanel Margin="5">
+                            <TextBlock Text="{DynamicResource Str_ChangePasswordDesc}" TextWrapping="Wrap" Margin="0,0,0,10" Foreground="Black" />
+                            <Button x:Name="BtnChangePassword" Content="{DynamicResource Str_BtnChange}" Style="{StaticResource BtnRetro}" HorizontalAlignment="Left" Click="BtnChangePassword_Click" />
+                        </StackPanel>
+                    </GroupBox>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="0,0,0,24">
+                    <GroupBox Header="Sınırlar ve Süreler" Margin="0,0,0,10">
+                        <Grid Margin="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-            <!-- ─── Başlık ─── -->
-            <TextBlock x:Name="SettingsTitle" Text="{DynamicResource Str_SettingsTitle}"
-                       Foreground="{StaticResource BrushTextPrimary}"
-                       FontFamily="{StaticResource FontPrimary}"
-                       FontSize="{StaticResource FontSizeXL}"
-                       FontWeight="Bold" Margin="0,0,0,24" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Str_MaxAttemptsTitle}" VerticalAlignment="Center" Foreground="Black" />
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtMaxAttempts" Width="40" Margin="0,2" Text="5" />
 
-            <!-- ═══ Güvenlik Ayarları ═══ -->
-            <TextBlock Text="{DynamicResource Str_Security}"
-                       Foreground="{StaticResource BrushTextSecondary}"
-                       FontFamily="{StaticResource FontPrimary}"
-                       FontSize="{StaticResource FontSizeS}"
-                       FontWeight="SemiBold" Margin="0,0,0,8" />
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_ChangePasswordTitle}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_ChangePasswordDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <Button x:Name="BtnChangePassword" Grid.Column="1"
-                            Content="{DynamicResource Str_BtnChange}"
-                            Style="{StaticResource BtnSecondary}"
-                            VerticalAlignment="Center"
-                            Click="BtnChangePassword_Click" />
-                </Grid>
-            </Border>
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_MaxAttemptsTitle}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_MaxAttemptsDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBox x:Name="TxtMaxAttempts"
-                                 Style="{StaticResource InputText}"
-                                 Width="50" Text="5"
-                                 TextAlignment="Center" />
-                        <TextBlock Text="{DynamicResource Str_LimitCount}"
-                                   Foreground="{StaticResource BrushTextSecondary}"
-                                   FontSize="{StaticResource FontSizeS}"
-                                   VerticalAlignment="Center" Margin="4,0,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_CooldownTitle}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_CooldownDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBox x:Name="TxtCooldown"
-                                 Style="{StaticResource InputText}"
-                                 Width="50" Text="30"
-                                 TextAlignment="Center" />
-                        <TextBlock Text="{DynamicResource Str_Seconds}"
-                                   Foreground="{StaticResource BrushTextSecondary}"
-                                   FontSize="{StaticResource FontSizeS}"
-                                   VerticalAlignment="Center" Margin="4,0,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_UiTimeoutTitle}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_UiTimeoutDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBox x:Name="TxtUiTimeout"
-                                 Style="{StaticResource InputText}"
-                                 Width="50" Text="30"
-                                 TextAlignment="Center" />
-                        <TextBlock Text="{DynamicResource Str_Seconds}"
-                                   Foreground="{StaticResource BrushTextSecondary}"
-                                   FontSize="{StaticResource FontSizeS}"
-                                   VerticalAlignment="Center" Margin="4,0,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- ═══ Genel Ayarlar ═══ -->
-            <TextBlock Text="{DynamicResource Str_General}"
-                       Foreground="{StaticResource BrushTextSecondary}"
-                       FontFamily="{StaticResource FontPrimary}"
-                       FontSize="{StaticResource FontSizeS}"
-                       FontWeight="SemiBold" Margin="0,0,0,8" />
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_SoundEffectsTitle}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_SoundEffectsDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <ToggleButton x:Name="ToggleSoundEnabled" Grid.Column="1"
-                                  Style="{StaticResource ToggleSwitch}"
-                                  IsChecked="True"
-                                  VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_AutostartTitle}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_AutostartDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <ToggleButton x:Name="ToggleStartWithWindows" Grid.Column="1"
-                                  Style="{StaticResource ToggleSwitch}"
-                                  IsChecked="True"
-                                  VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{DynamicResource Str_Language}"
-                                   Foreground="{StaticResource BrushTextPrimary}"
-                                   FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                        <TextBlock Text="{DynamicResource Str_LanguageDesc}"
-                                   Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="{StaticResource FontSizeS}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <ComboBox x:Name="ComboLanguage" Grid.Column="1"
-                              Width="120" VerticalAlignment="Center"
-                              SelectedIndex="0" SelectionChanged="ComboLanguage_SelectionChanged">
-                        <ComboBoxItem Content="Türkçe" />
-                        <ComboBoxItem Content="English" />
-                    </ComboBox>
-                </Grid>
-            </Border>
-
-            <!-- ═══ Hakkında ═══ -->
-            <TextBlock Text="{DynamicResource Str_About}"
-                       Foreground="{StaticResource BrushTextSecondary}"
-                       FontFamily="{StaticResource FontPrimary}"
-                       FontSize="{StaticResource FontSizeS}"
-                       FontWeight="SemiBold" Margin="0,0,0,8" />
-
-            <Border Style="{StaticResource CardPanel}" Margin="0,0,0,8">
-                <StackPanel>
-                    <TextBlock Text="WinAppLock v0.0.100"
-                               Foreground="{StaticResource BrushTextPrimary}"
-                               FontSize="{StaticResource FontSizeMD}" FontWeight="SemiBold" />
-                    <TextBlock Text="FOSS — GNU General Public License v3.0"
-                               Foreground="{StaticResource BrushTextMuted}"
-                               FontSize="{StaticResource FontSizeS}" Margin="0,4,0,4" />
-                    <TextBlock Text="github.com/aybrkaknc/winapplock"
-                               Foreground="{StaticResource BrushAccentSecondary}"
-                               FontSize="{StaticResource FontSizeS}"
-                               Cursor="Hand"
-                               MouseLeftButtonDown="GithubLink_Click" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Str_CooldownTitle}" VerticalAlignment="Center" Foreground="Black" />
+                            <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtCooldown" Width="40" Margin="0,2" Text="30" />
+                        </Grid>
+                    </GroupBox>
                 </StackPanel>
-            </Border>
+            </TabItem>
 
-            <!-- Kaydet Butonu -->
-            <Button x:Name="BtnSaveSettings"
-                    Content="{DynamicResource Str_BtnSaveSettings}"
-                    Style="{StaticResource BtnPrimary}"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0"
-                    Click="BtnSaveSettings_Click" />
+            <!-- ═══ 2. GÖRÜNÜM (Appearance - YENİ!) ═══ -->
+            <TabItem Header="Görünüm">
+                <StackPanel Margin="0,10,0,0">
+                    <GroupBox Header="Tema Motoru">
+                        <Grid Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="150" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-        </StackPanel>
-    </ScrollViewer>
+                            <TextBlock Grid.Row="0" Text="Ana Tema:" VerticalAlignment="Center" Foreground="Black" />
+                            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="ComboThemeBase" Margin="0,2">
+                                <ComboBoxItem Content="Dark Retro (Vırtual)" IsSelected="True" />
+                                <ComboBoxItem Content="Classic Light" />
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="1" Text="Navigasyon Stili:" VerticalAlignment="Center" Foreground="Black" />
+                            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="ComboNavStyle" Margin="0,2">
+                                <ComboBoxItem Content="Sekmeli (Önerilen)" IsSelected="True" />
+                                <ComboBoxItem Content="Kenar Çubuğu" />
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="2" Text="Animasyonlar:" VerticalAlignment="Center" Foreground="Black" />
+                            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="ComboAnimations" Margin="0,2">
+                                <ComboBoxItem Content="Anında (Win98)" IsSelected="True" />
+                                <ComboBoxItem Content="Yumuşak (Vite)" />
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="3" Text="Başlık Çubuğu:" VerticalAlignment="Center" Foreground="Black" />
+                            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="ComboTitleGradient" Margin="0,2">
+                                <ComboBoxItem Content="Düz Geçiş (Smooth)" IsSelected="True" />
+                                <ComboBoxItem Content="8-bit Klasik" />
+                            </ComboBox>
+
+                            <TextBlock Grid.Row="4" Text="İkon Seti:" VerticalAlignment="Center" Foreground="Black" />
+                            <ComboBox Grid.Row="4" Grid.Column="1" x:Name="ComboIconSet" Margin="0,2">
+                                <ComboBoxItem Content="Orijinal 98" IsSelected="True" />
+                                <ComboBoxItem Content="Modernize" />
+                            </ComboBox>
+                        </Grid>
+                    </GroupBox>
+                    
+                    <CheckBox x:Name="CheckSoundEffects" Content="Sistem ses efektlerini kullan (Startup/Error)" Margin="5,10,0,0" IsChecked="True" Foreground="Black" />
+                </StackPanel>
+            </TabItem>
+
+            <!-- ═══ 3. GENEL (General) ═══ -->
+            <TabItem Header="{DynamicResource Str_General}">
+                <StackPanel Margin="0,10,0,0">
+                    <GroupBox Header="Sistem Arabirimi">
+                        <StackPanel Margin="5">
+                            <CheckBox x:Name="CheckStartWithWindows" Content="{DynamicResource Str_AutostartTitle}" IsChecked="True" Foreground="Black" />
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{DynamicResource Str_Language}" VerticalAlignment="Center" Foreground="Black" />
+                                <ComboBox Grid.Column="1" x:Name="ComboLanguage" SelectedIndex="0" SelectionChanged="ComboLanguage_SelectionChanged">
+                                    <ComboBoxItem Content="Türkçe" />
+                                    <ComboBoxItem Content="English" />
+                                </ComboBox>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="{DynamicResource Str_About}" Margin="0,10,0,0">
+                        <StackPanel Margin="5">
+                            <TextBlock Text="WinAppLock v0.0.102" FontWeight="Bold" Foreground="Black" />
+                            <TextBlock Text="Açık Kaynak (GPLv3)" Margin="0,2" Foreground="Black" />
+                            <TextBlock Text="github.com/aybrkaknc/winapplock" Foreground="Blue" Cursor="Hand" TextDecorations="Underline" MouseLeftButtonDown="GithubLink_Click" />
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            
+        </TabControl>
+
+        <Button x:Name="BtnSaveSettings"
+                Grid.Row="1"
+                Content="Uygula"
+                Style="{StaticResource BtnRetro}"
+                Width="80" Height="24"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,0"
+                Click="BtnSaveSettings_Click" />
+    </Grid>
 </UserControl>
