@@ -42,10 +42,16 @@ public class GatekeeperPipeServer : IDisposable
     private readonly string _gatekeeperPath;
 
     /// <summary>
-    /// Aynı kilitli uygulamanın (örn: chrome.exe) saniyeler içinde arka arkaya başlattığı alt işlemlere
-    /// (sekmeler, eklentiler) otomatik izin veren Yetki Ön Belleği. Key: ExecutableName, Value: ExpiryTime.
+    /// Eğer aynı exe için birden fazla peş peşe talep gelirse, Auth kargaşasını önlemek adına
+    /// şifrenin geçerli sayıldığı (10 saniyelik grace period) bitiş zamanını saklar.
     /// </summary>
     private readonly ConcurrentDictionary<string, DateTime> _authCache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Auto-Relock (Zamanlı Yeniden Kilitleme) için şifrenin girildiği ilk anı saklar.
+    /// Key: ExeName, Value: Şifrenin açıldığı UTC zamanı.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, DateTime> _unlockSessions = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Başarılı şifre girişinden sonra çoklu işlemler için tanınan şifresiz geçiş süresi (30 saniye).</summary>
     private static readonly TimeSpan AUTH_GRACE_PERIOD = TimeSpan.FromSeconds(30);
@@ -73,17 +79,21 @@ public class GatekeeperPipeServer : IDisposable
     /// </summary>
     private async Task AcceptConnections(CancellationToken ct)
     {
+        var pipeSecurity = CreatePipeSecurity();
+
         while (!ct.IsCancellationRequested)
         {
+            NamedPipeServerStream? pipe = null;
             try
             {
-                // Tüm kullanıcıların (non-admin dahil) bağlanabilmesi için güvenlik ayarı
-                var pipeSecurity = CreatePipeSecurity();
+                // Çok kısa bekleme
+                await Task.Delay(50, ct);
 
-                var pipe = NamedPipeServerStreamAcl.Create(
+                // ACL ile oluşturmayı dene
+                pipe = NamedPipeServerStreamAcl.Create(
                     PipeConstants.GATEKEEPER_PIPE,
                     PipeDirection.InOut,
-                    NamedPipeServerStream.MaxAllowedServerInstances,
+                    100, // Maksimum instance
                     PipeTransmissionMode.Byte,
                     PipeOptions.Asynchronous,
                     PipeConstants.BUFFER_SIZE,
@@ -92,19 +102,44 @@ public class GatekeeperPipeServer : IDisposable
 
                 await pipe.WaitForConnectionAsync(ct);
 
-                // Her bağlantıyı arka planda işle
+                // İşleme görevine devret
                 _ = HandleGatekeeperConnection(pipe, ct);
             }
             catch (OperationCanceledException)
             {
+                pipe?.Dispose();
                 break;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Warning("[GatekeeperPipe] Yetki uyarısı (Hata yoksayılıp tekrar deneniyor): {Msg}", ex.Message);
+                pipe?.Dispose();
+                await Task.Delay(1000, ct);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[GatekeeperPipe] Bağlantı kabul hatası");
-                await Task.Delay(500, ct);
+                Log.Error(ex, "[GatekeeperPipe] Bağlantı hatası");
+                pipe?.Dispose();
+                await Task.Delay(1000, ct);
             }
         }
+    }
+
+    /// <summary>
+    /// Pipe için erişim kurallarını oluşturur.
+    /// </summary>
+    private static PipeSecurity CreatePipeSecurity()
+    {
+        var security = new PipeSecurity();
+        
+        // Herkese (Everyone) tam yetki ver (Erişim engeli sorunlarını aşmak için en geniş ayar)
+        var everyoneSid = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+        security.AddAccessRule(new PipeAccessRule(
+            everyoneSid,
+            PipeAccessRights.FullControl,
+            AccessControlType.Allow));
+
+        return security;
     }
 
     /// <summary>
@@ -264,10 +299,14 @@ public class GatekeeperPipeServer : IDisposable
 
             if (isSuccess)
             {
-                // Başarılı girişte 10 saniyelik şifresiz geçiş "dalga kalkanı"nı aktifleştir
+                // Başarılı girişte 30 saniyelik şifresiz geçiş "dalga kalkanı"nı aktifleştir
                 var cacheKey = _activeSession.MatchedApp.Identity.ExecutableName;
                 _authCache[cacheKey] = DateTime.UtcNow.Add(AUTH_GRACE_PERIOD);
-                Log.Debug("[GatekeeperPipe] {App} için 10s Grace Period başlatıldı.", _activeSession.MatchedApp.DisplayName);
+                
+                // Zamanlı Relock için kilit açılma anını kaydet
+                _unlockSessions[cacheKey] = DateTime.UtcNow;
+
+                Log.Debug("[GatekeeperPipe] {App} için 30s Grace Period başlatıldı ve Oturum Kaydedildi.", _activeSession.MatchedApp.DisplayName);
             }
 
             _activeSession.CompletionSource.SetResult(response);
@@ -329,28 +368,7 @@ public class GatekeeperPipeServer : IDisposable
             string.Equals(a.Identity.ExecutableName, exeName, StringComparison.OrdinalIgnoreCase));
     }
 
-    /// <summary>
-    /// Pipe güvenlik ayarlarını oluşturur.
-    /// Gatekeeper, kullanıcı oturumunda (non-admin) çalışır → herkesin bağlanabilmesi gerekir.
-    /// </summary>
-    private static PipeSecurity CreatePipeSecurity()
-    {
-        var security = new PipeSecurity();
 
-        // Everyone (tüm kullanıcılar) okuma-yazma izni
-        security.AddAccessRule(new PipeAccessRule(
-            new SecurityIdentifier(WellKnownSidType.WorldSid, null),
-            PipeAccessRights.ReadWrite,
-            AccessControlType.Allow));
-
-        // SYSTEM tam kontrol
-        security.AddAccessRule(new PipeAccessRule(
-            new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
-            PipeAccessRights.FullControl,
-            AccessControlType.Allow));
-
-        return security;
-    }
 
     /// <summary>Pipe'tan Gatekeeper isteğini okur (uzunluk ön ekli JSON).</summary>
     private async Task<GatekeeperRequest?> ReadRequest(NamedPipeServerStream pipe, CancellationToken ct)
@@ -394,6 +412,19 @@ public class GatekeeperPipeServer : IDisposable
         {
             Log.Warning(ex, "[GatekeeperPipe] Yanıt yazma hatası");
         }
+    }
+
+    /// <summary>Belirli bir uygulamanın yetkili oturumunu iptal eder. (Zamanlı kilitleme için)</summary>
+    public void LockAppSession(string exeName)
+    {
+        _authCache.TryRemove(exeName, out _);
+        _unlockSessions.TryRemove(exeName, out _);
+    }
+
+    /// <summary>Açık olan tüm kilit oturumlarını döndürür.</summary>
+    public IReadOnlyDictionary<string, DateTime> GetActiveUnlockSessions()
+    {
+        return _unlockSessions;
     }
 
     public void Dispose()

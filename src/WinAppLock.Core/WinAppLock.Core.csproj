@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>WinAppLock.Core</RootNamespace>
     <AssemblyName>WinAppLock.Core</AssemblyName>
-    <Version>0.0.104</Version>
+    <Version>0.0.105</Version>
   </PropertyGroup>
 
   <ItemGroup>

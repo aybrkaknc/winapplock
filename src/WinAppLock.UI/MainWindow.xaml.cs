@@ -7,6 +7,7 @@ using WinAppLock.Core.Data;
 using WinAppLock.Core.Identification;
 using WinAppLock.Core.Models;
 using WinAppLock.UI.Services;
+using System.Windows.Media.Animation;
 
 namespace WinAppLock.UI;
 
@@ -24,7 +25,100 @@ public partial class MainWindow : Window
         InitializeComponent();
         _database = new AppDatabase();
         LoadLockedApps();
+        
+        // Başlangıçta Dashboard aktif
+        BtnSidebarDashboard.Tag = "Active";
+
+        // Akıllı Boyutlandırma Uygula
+        ApplySmartSizing();
+        
+        // Pencere durum değişikliklerini izle (Maximize vs.)
+        StateChanged += MainWindow_StateChanged;
+
+        // Görev çubuğu ikonu: exe'nin gömülü ikonunu yükle
+        SetWindowIconFromExe();
     }
+
+    /// <summary>
+    /// Çalışan exe'nin gömülü ikonunu Window.Icon özelliğine atar.
+    /// WindowStyle=None olduğunda WPF ikonu otomatik bulamaz,
+    /// bu yüzden manuel olarak exe'den çıkarılıp atanır.
+    /// </summary>
+    private void SetWindowIconFromExe()
+    {
+        try
+        {
+            var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (exePath == null) return;
+
+            var icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+            if (icon == null) return;
+
+            using var stream = new MemoryStream();
+            icon.Save(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var bitmapFrame = System.Windows.Media.Imaging.BitmapFrame.Create(
+                stream, 
+                System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat, 
+                System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+            Icon = bitmapFrame;
+        }
+        catch { /* Fallback: ikon gösterilmez */ }
+    }
+
+    /// <summary>
+    /// Ekran çözünürlüğüne göre akıllı ve ferah bir başlangıç boyutu atar.
+    /// 1080p, 2K ve 4K monitörlerde içeriğin tam sığmasını ve profesyonel görünmesini sağlar.
+    /// </summary>
+    private void ApplySmartSizing()
+    {
+        // Kullanıcının görev çubuğu hariç çalışma alanını al
+        var workArea = SystemParameters.WorkArea;
+        
+        // Ekranın %70'ini hedefle (ama mantıklı sınırlar içinde kal)
+        double targetWidth = workArea.Width * 0.7;
+        double targetHeight = workArea.Height * 0.75;
+
+        // Modern UI için "Golden Ratio" sınırları
+        Width = Math.Clamp(targetWidth, 1000, 1400); 
+        Height = Math.Clamp(targetHeight, 700, 900);
+
+        // Pencereyi tam ortaya yerleştir
+        Left = (workArea.Width - Width) / 2 + workArea.Left;
+        Top = (workArea.Height - Height) / 2 + workArea.Top;
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            // Tam ekranda köşeleri düz yap ve kenarlığı kaldır (veya incelt)
+            WindowBorder.CornerRadius = new CornerRadius(0);
+            WindowBorder.BorderThickness = new Thickness(0);
+            
+            if (BtnMaximize != null)
+            {
+                BtnMaximize.Content = "❐"; // Restore icon
+                BtnMaximize.ToolTip = L("Str_ToolTipRestore", "Aşağı Geri Getir");
+            }
+        }
+        else
+        {
+            // Normal modda yuvarlak köşeleri geri getir
+            var radius = TryFindResource("RadiusLarge") as CornerRadius? ?? new CornerRadius(12);
+            WindowBorder.CornerRadius = radius;
+            WindowBorder.BorderThickness = new Thickness(1);
+            
+            if (BtnMaximize != null)
+            {
+                BtnMaximize.Content = "☐"; // Maximize icon
+                BtnMaximize.ToolTip = L("Str_ToolTipMaximize", "Tam Ekran");
+            }
+        }
+    }
+
+    private bool _isSidebarExpanded = false;
 
     /// <summary>
     /// PipeClient referansını MainWindow'a bağlar.
@@ -74,22 +168,83 @@ public partial class MainWindow : Window
         WindowState = WindowState.Minimized;
     }
 
+    /// <summary>Pencereyi tam ekran yapma / restore etme.</summary>
+    private void BtnMaximize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+    }
+
     /// <summary>Pencereyi kapatma (system tray'e gider).</summary>
     private void BtnClose_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: System tray'e küçült (TrayIconService entegrasyonunda)
-        Hide();
+        Close();
+    }
+
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (Application.Current is App app && !app.IsExiting)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+        else
+        {
+            base.OnClosing(e);
+        }
     }
 
     // ═══════════════════════════════════════
-    // Navigasyon
+    // Navigasyon & Sidebar
     // ═══════════════════════════════════════
+
+    /// <summary>Sidebar'ı genişletir veya daraltır (Handle ve Hamburger butonu tarafından tetiklenir).</summary>
+    private void BtnSidebarToggle_Click(object sender, RoutedEventArgs e)
+    {
+        _isSidebarExpanded = !_isSidebarExpanded;
+        
+        double targetWidth = _isSidebarExpanded ? 240 : 54;
+        string arrow = _isSidebarExpanded ? "‹" : "›";
+        
+        // Genişlik Animasyonu (Push Etkisi)
+        var anim = new DoubleAnimation
+        {
+            To = targetWidth,
+            Duration = TimeSpan.FromSeconds(0.25),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+        };
+        Sidebar.BeginAnimation(WidthProperty, anim);
+        
+        TxtHandleArrow.Text = arrow;
+        
+        // Metinleri göster / gizle
+        TxtSidebarDashboard.Visibility = _isSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
+        TxtSidebarSettings.Visibility = _isSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
+        
+        // Overlay (Dışarı tıkla-kapat) sadece açıkken görünür
+        SidebarOverlay.Visibility = _isSidebarExpanded ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>Sidebar dışına tıklandığında menüyü kapatır.</summary>
+    private void SidebarOverlay_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_isSidebarExpanded) 
+            BtnSidebarToggle_Click(sender, e);
+    }
 
     /// <summary>Dashboard sayfasını göster.</summary>
     private void BtnNavDashboard_Click(object sender, RoutedEventArgs e)
     {
         DashboardContent.Visibility = Visibility.Visible;
         SettingsContent.Visibility = Visibility.Collapsed;
+        
+        BtnSidebarDashboard.Tag = "Active";
+        BtnSidebarSettings.Tag = null;
+
+        // Navigasyondan sonra sidebar'ı daralt (isteğe bağlı, şık durur)
+        if (_isSidebarExpanded) 
+            BtnSidebarToggle_Click(sender, null!);
     }
 
     /// <summary>Ayarlar sayfasını göster.</summary>
@@ -97,6 +252,12 @@ public partial class MainWindow : Window
     {
         DashboardContent.Visibility = Visibility.Collapsed;
         SettingsContent.Visibility = Visibility.Visible;
+        
+        BtnSidebarSettings.Tag = "Active";
+        BtnSidebarDashboard.Tag = null;
+
+        if (_isSidebarExpanded) 
+            BtnSidebarToggle_Click(sender, null!);
     }
 
     // ═══════════════════════════════════════
@@ -344,7 +505,7 @@ public partial class MainWindow : Window
         // ─── Sil Butonu ───
         var deleteBtn = new Button
         {
-            Content = "🗑",
+            Content = "✕",
             Style = (Style)FindResource("BtnIcon"),
             VerticalAlignment = VerticalAlignment.Center,
             ToolTip = L("Str_RemoveLock", "Kilidi kaldır")
@@ -414,13 +575,4 @@ public partial class MainWindow : Window
         }
     }
 
-    // ═══════════════════════════════════════
-    // Tümünü Kilitle
-    // ═══════════════════════════════════════
-
-    /// <summary>Tüm uygulamaları kilitle (Service'e LockAll komutu gönderir).</summary>
-    private void BtnLockAll_Click(object sender, RoutedEventArgs e)
-    {
-        _pipeClient?.SendLockAll();
-    }
 }

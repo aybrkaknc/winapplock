@@ -43,6 +43,9 @@ public class AppSettings
     /// <summary>İlk kurulum tamamlandı mı?</summary>
     public bool SetupCompleted { get; set; } = false;
 
+    /// <summary>Uygulamaların şifre sonrası otomatik tekrar kilitlenme süresi (Dakika). 0: Kapalı.</summary>
+    public int AutoRelockMinutes { get; set; } = 0;
+
     /// <summary>Recovery Key hash'i (kurtarma anahtarı doğrulaması için).</summary>
     public string RecoveryKeyHash { get; set; } = string.Empty;
 

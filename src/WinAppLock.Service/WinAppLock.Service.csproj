@@ -6,7 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>WinAppLock.Service</RootNamespace>
     <AssemblyName>WinAppLock.Service</AssemblyName>
-    <Version>0.0.104</Version>
+    <UserSecretsId>dotnet-WinAppLock.Service-e41afeb3-d343-4efc-8b89-aeffd3c63198</UserSecretsId>
+    <Version>0.0.105</Version>
   </PropertyGroup>
 
   <ItemGroup>

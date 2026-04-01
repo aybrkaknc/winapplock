@@ -301,10 +301,10 @@ public static class IfeoRegistrar
                 PropagationFlags.None,
                 AccessControlType.Allow));
 
-            // 2. ADMINISTRATORS (Yöneticiler) -> SADECE OKUMA YETKİSİ
+            // 2. ADMINISTRATORS (Yöneticiler) -> SİLME DAHİL TAM YETKİ
             rs.AddAccessRule(new RegistryAccessRule(
                 new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-                RegistryRights.ReadKey,
+                RegistryRights.FullControl,
                 InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
                 PropagationFlags.None,
                 AccessControlType.Allow));

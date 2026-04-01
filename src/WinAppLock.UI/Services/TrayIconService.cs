@@ -21,9 +21,6 @@ public class TrayIconService : IDisposable
     /// <summary>Çıkış menüsü seçildiğinde tetiklenir.</summary>
     public event Action? ExitRequested;
 
-    /// <summary>Tümünü Kilitle menüsü seçildiğinde tetiklenir.</summary>
-    public event Action? LockAllRequested;
-
     /// <summary>
     /// Tray ikonunu oluşturur ve gösterir.
     /// </summary>
@@ -47,12 +44,6 @@ public class TrayIconService : IDisposable
         var showItem = new ToolStripMenuItem(L("Str_TrayOpen", "WinAppLock'u Aç"));
         showItem.Click += (_, _) => ShowRequested?.Invoke();
         contextMenu.Items.Add(showItem);
-
-        contextMenu.Items.Add(new ToolStripSeparator());
-
-        var lockAllItem = new ToolStripMenuItem(L("Str_TrayLockAll", "🔐 Tümünü Kilitle"));
-        lockAllItem.Click += (_, _) => LockAllRequested?.Invoke();
-        contextMenu.Items.Add(lockAllItem);
 
         contextMenu.Items.Add(new ToolStripSeparator());
 

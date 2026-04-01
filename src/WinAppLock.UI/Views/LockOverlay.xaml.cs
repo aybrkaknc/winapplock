@@ -48,6 +48,18 @@ public partial class LockOverlay : Window
     public LockOverlay()
     {
         InitializeComponent();
+
+        // Tasarım modunda mıyız kontrol et (Designer'ın çökmesini engeller)
+        if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
+        {
+            // Derleyicinin (CS8618 vb.) uninitialized error vermemesi için sahte (dummy) atamalar yapıyoruz.
+            // Zaten tasarım aşamasında bu sınıfların metotları çalışmayacak.
+            _database = null!;
+            _settings = null!;
+            _authenticator = null!;
+            return;
+        }
+
         _database = new AppDatabase();
         _settings = _database.GetSettings();
 

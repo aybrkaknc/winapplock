@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xml:space="preserve">
 
     <!-- Global -->
     <sys:String x:Key="Str_AppTitle">WinAppLock</sys:String>
@@ -40,10 +41,9 @@
     <sys:String x:Key="Str_SecurityAnswer">Answer</sys:String>
 
     <!-- MainWindow -->
-    <sys:String x:Key="Str_Dashboard">📋  Dashboard</sys:String>
-    <sys:String x:Key="Str_Settings">⚙️  Settings</sys:String>
-    <sys:String x:Key="Str_ServiceActive">Service Active</sys:String>
-    <sys:String x:Key="Str_LockAll">🔐  Lock All</sys:String>
+    <sys:String x:Key="Str_Dashboard">Dashboard</sys:String>
+    <sys:String x:Key="Str_Settings">Settings</sys:String>
+
 
     <!-- Dashboard -->
     <sys:String x:Key="Str_LockedApps">Locked Apps</sys:String>
@@ -69,9 +69,19 @@
     <sys:String x:Key="Str_CooldownTitle">Cooldown Time</sys:String>
     <sys:String x:Key="Str_CooldownDesc">How many seconds to wait after limit is reached</sys:String>
     <sys:String x:Key="Str_Seconds"> sec</sys:String>
+    <sys:String x:Key="Str_Minute"> Minute</sys:String>
+    <sys:String x:Key="Str_Minutes"> Minutes</sys:String>
+    <sys:String x:Key="Str_Attempts"> Attempts</sys:String>
+    <sys:String x:Key="Str_AlwaysPrompt">Always Prompt</sys:String>
 
     <sys:String x:Key="Str_UiTimeoutTitle">UI Timeout</sys:String>
     <sys:String x:Key="Str_UiTimeoutDesc">Ask for password again when idle</sys:String>
+
+    <sys:String x:Key="Str_AutoRelockTitle">Auto Relock Duration</sys:String>
+    <sys:String x:Key="Str_AutoRelockDesc">Suspend open apps automatically after a certain time</sys:String>
+    <sys:String x:Key="Str_RelockDisabled">Disabled</sys:String>
+    <sys:String x:Key="Str_RelockMinutes">{0} Minutes</sys:String>
+    <sys:String x:Key="Str_RelockHour">1 Hour</sys:String>
 
     <sys:String x:Key="Str_General">GENERAL</sys:String>
     <sys:String x:Key="Str_SoundEffectsTitle">Sound Effects</sys:String>
@@ -147,5 +157,16 @@
     <sys:String x:Key="Str_TrayOpen">Open WinAppLock</sys:String>
     <sys:String x:Key="Str_TrayLockAll">🔐 Lock All</sys:String>
     <sys:String x:Key="Str_TrayExit">Exit</sys:String>
+
+    <!-- ChangePasswordWindow -->
+    <sys:String x:Key="Str_CP_Title">Change Password</sys:String>
+    <sys:String x:Key="Str_CP_Step1">Authentication</sys:String>
+    <sys:String x:Key="Str_CP_VerifyDesc">Verify your identity by entering your current password or PIN to continue.</sys:String>
+    <sys:String x:Key="Str_CP_EnterCurrentPin">Enter Current PIN</sys:String>
+    <sys:String x:Key="Str_CP_EnterCurrentPassword">Enter Current Password</sys:String>
+    <sys:String x:Key="Str_CP_Verify">Verify</sys:String>
+    <sys:String x:Key="Str_CP_Incorrect">Incorrect entry! Attempts remaining: {0}</sys:String>
+    <sys:String x:Key="Str_CP_LockedOut">Too many failed attempts!\nOperation blocked for security.</sys:String>
+    <sys:String x:Key="Str_CP_NewRecoveryKeyDesc">Your old recovery key is revoked.&#x0a;Save this new key for your security!</sys:String>
 
 </ResourceDictionary>

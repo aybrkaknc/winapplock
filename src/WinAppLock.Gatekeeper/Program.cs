@@ -65,9 +65,25 @@ var response = AskService(request);
 
 if (response == null)
 {
-    // Fail-Closed: Service'e ulaşılamadı → uygulama başlatılMAZ
-    Environment.Exit(2);
-    return;
+    // Fail-Safe: Service kapalı. Orijinal uygulamayı bloklamak yerine WinAppLock'u uyandır.
+    if (WakeUpWinAppLockSystem())
+    {
+        // 5 defa 1'er saniye bekleyip tekrar şansımızı deniyoruz.
+        for (int i = 0; i < 5; i++)
+        {
+            System.Threading.Thread.Sleep(1000);
+            response = AskService(request);
+            if (response != null)
+                break;
+        }
+    }
+
+    // Sisteme hiçbir şekilde ulaşılamazsa kapat
+    if (response == null)
+    {
+        Environment.Exit(2);
+        return;
+    }
 }
 
 if (response.Verdict == GatekeeperVerdict.Allow)
@@ -134,6 +150,32 @@ static GatekeeperResponse? AskService(GatekeeperRequest request)
     {
         // Fail-Closed: Beklenmeyen hata
         return null;
+    }
+}
+
+static bool WakeUpWinAppLockSystem()
+{
+    try
+    {
+        var basePath = AppDomain.CurrentDomain.BaseDirectory;
+        var uiPath = Path.Combine(basePath, "WinAppLock.UI.exe");
+
+        if (File.Exists(uiPath))
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = uiPath,
+                Arguments = "--hidden",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            });
+            return true;
+        }
+        return false;
+    }
+    catch
+    {
+        return false;
     }
 }
 

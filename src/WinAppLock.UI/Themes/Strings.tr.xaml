@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xml:space="preserve">
 
     <!-- Global -->
     <sys:String x:Key="Str_AppTitle">WinAppLock</sys:String>
@@ -40,10 +41,9 @@
     <sys:String x:Key="Str_SecurityAnswer">Cevap</sys:String>
 
     <!-- MainWindow -->
-    <sys:String x:Key="Str_Dashboard">📋  Dashboard</sys:String>
-    <sys:String x:Key="Str_Settings">⚙️  Ayarlar</sys:String>
-    <sys:String x:Key="Str_ServiceActive">Servis Aktif</sys:String>
-    <sys:String x:Key="Str_LockAll">🔐  Tümünü Kilitle</sys:String>
+    <sys:String x:Key="Str_Dashboard">Dashboard</sys:String>
+    <sys:String x:Key="Str_Settings">Ayarlar</sys:String>
+
 
     <!-- Dashboard -->
     <sys:String x:Key="Str_LockedApps">Kilitli Uygulamalar</sys:String>
@@ -69,9 +69,19 @@
     <sys:String x:Key="Str_CooldownTitle">Bekleme Süresi</sys:String>
     <sys:String x:Key="Str_CooldownDesc">Limit aşıldığında kaç saniye beklenecek</sys:String>
     <sys:String x:Key="Str_Seconds"> sn</sys:String>
+    <sys:String x:Key="Str_Minute"> Dakika</sys:String>
+    <sys:String x:Key="Str_Minutes"> Dakika</sys:String>
+    <sys:String x:Key="Str_Attempts"> Deneme</sys:String>
+    <sys:String x:Key="Str_AlwaysPrompt">Her Zaman Sor</sys:String>
 
     <sys:String x:Key="Str_UiTimeoutTitle">UI Zaman Aşımı</sys:String>
     <sys:String x:Key="Str_UiTimeoutDesc">İşlem yapılmadığında tekrar şifre sor</sys:String>
+
+    <sys:String x:Key="Str_AutoRelockTitle">Otomatik Yeniden Kilitleme</sys:String>
+    <sys:String x:Key="Str_AutoRelockDesc">Açık olan uygulamayı belirli bir süre sonra sormadan dondur</sys:String>
+    <sys:String x:Key="Str_RelockDisabled">Kapalı</sys:String>
+    <sys:String x:Key="Str_RelockMinutes">{0} Dakika</sys:String>
+    <sys:String x:Key="Str_RelockHour">1 Saat</sys:String>
 
     <sys:String x:Key="Str_General">GENEL</sys:String>
     <sys:String x:Key="Str_SoundEffectsTitle">Ses Efektleri</sys:String>
@@ -147,5 +157,16 @@
     <sys:String x:Key="Str_TrayOpen">WinAppLock'u Aç</sys:String>
     <sys:String x:Key="Str_TrayLockAll">🔐 Tümünü Kilitle</sys:String>
     <sys:String x:Key="Str_TrayExit">Çıkış</sys:String>
+
+    <!-- ChangePasswordWindow -->
+    <sys:String x:Key="Str_CP_Title">Şifre Değiştirme</sys:String>
+    <sys:String x:Key="Str_CP_Step1">Doğrulama</sys:String>
+    <sys:String x:Key="Str_CP_VerifyDesc">Devam etmek için mevcut şifrenizi veya PIN'inizi girerek kimliğinizi doğrulayın.</sys:String>
+    <sys:String x:Key="Str_CP_EnterCurrentPin">Mevcut PIN'i Girin</sys:String>
+    <sys:String x:Key="Str_CP_EnterCurrentPassword">Mevcut Şifreyi Girin</sys:String>
+    <sys:String x:Key="Str_CP_Verify">Doğrula</sys:String>
+    <sys:String x:Key="Str_CP_Incorrect">Yanlış giriş! Kalan deneme: {0}</sys:String>
+    <sys:String x:Key="Str_CP_LockedOut">Çok fazla hatalı deneme!\nGüvenlik gereği işlem bloke edildi.</sys:String>
+    <sys:String x:Key="Str_CP_NewRecoveryKeyDesc">Eski kurtarma anahtarınız geçersiz kılındı.&#x0a;Güvenliğiniz için bu yeni anahtarı mutlaka saklayın!</sys:String>
 
 </ResourceDictionary>

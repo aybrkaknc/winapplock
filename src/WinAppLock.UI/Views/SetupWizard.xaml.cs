@@ -1,6 +1,8 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using WinAppLock.Core.Data;
 using WinAppLock.Core.Models;
 using WinAppLock.Core.Security;
@@ -20,8 +22,12 @@ public partial class SetupWizard : Window
 
     // Kullanıcı seçimleri
     private AuthMethod _selectedAuthMethod = AuthMethod.Pin;
-    private int _selectedPinLength = 6;
+    private int _selectedPinLength = 4; // FIXED
     private string _generatedRecoveryKey = string.Empty;
+
+    // Numpad Setup Alanı İçin
+    private string _setupPin1 = string.Empty;
+    private string _setupPin2 = string.Empty;
 
     public SetupWizard()
     {
@@ -53,20 +59,16 @@ public partial class SetupWizard : Window
     // Adım 2: Kimlik Doğrulama Seçimi
     // ═══════════════════════════════════════
 
-    /// <summary>PIN yöntemi seçildi.</summary>
     private void CardAuthPin_Click(object sender, MouseButtonEventArgs e)
     {
         _selectedAuthMethod = AuthMethod.Pin;
         HighlightSelectedCard(CardAuthPin, CardAuthPassword);
-        PinLengthSelector.Visibility = Visibility.Visible;
     }
 
-    /// <summary>Şifre yöntemi seçildi.</summary>
     private void CardAuthPassword_Click(object sender, MouseButtonEventArgs e)
     {
         _selectedAuthMethod = AuthMethod.Password;
         HighlightSelectedCard(CardAuthPassword, CardAuthPin);
-        PinLengthSelector.Visibility = Visibility.Collapsed;
     }
 
     /// <summary>Seçili kartı vurgular, diğerini normal yapar.</summary>
@@ -141,8 +143,18 @@ public partial class SetupWizard : Window
         switch (_currentStep)
         {
             case 3: // Şifre/PIN belirleme
-                var pw1 = SetupPasswordBox1.Password;
-                var pw2 = SetupPasswordBox2.Password;
+                string pw1, pw2;
+                
+                if (_selectedAuthMethod == AuthMethod.Pin)
+                {
+                    pw1 = _setupPin1;
+                    pw2 = _setupPin2;
+                }
+                else
+                {
+                    pw1 = SetupPasswordBox1.Password;
+                    pw2 = SetupPasswordBox2.Password;
+                }
 
                 if (string.IsNullOrEmpty(pw1))
                 {
@@ -175,17 +187,11 @@ public partial class SetupWizard : Window
         }
     }
 
-    /// <summary>Adımdan çıkarken yapılacak işlemler.</summary>
     private void OnStepLeaving(int step)
     {
         if (step == 2)
         {
-            // PIN uzunluğunu oku
-            if (RadioPin4.IsChecked == true) _selectedPinLength = 4;
-            else if (RadioPin5.IsChecked == true) _selectedPinLength = 5;
-            else if (RadioPin6.IsChecked == true) _selectedPinLength = 6;
-            else if (RadioPin7.IsChecked == true) _selectedPinLength = 7;
-            else if (RadioPin8.IsChecked == true) _selectedPinLength = 8;
+            // PIN uzunluğunu oku - SABİT 4 OLDUĞU İÇİN İPTAL
         }
     }
 
@@ -198,19 +204,29 @@ public partial class SetupWizard : Window
                 // Başlığı yönteme göre güncelle
                 if (_selectedAuthMethod == AuthMethod.Pin)
                 {
+                    SetupPasswordArea.Visibility = Visibility.Collapsed;
+                    SetupPinArea.Visibility = Visibility.Visible;
+                    
                     Step3Title.Text = string.Format(L("Str_MasterPinSet", "Master PIN Belirle ({0} Hane)"), _selectedPinLength);
                     Step3Description.Text = L("Str_MasterPinSetDesc", "Bu PIN'i her kilitli uygulamayı açmak için kullanacaksın.");
-                    SetupPasswordBox1.MaxLength = _selectedPinLength;
-                    SetupPasswordBox2.MaxLength = _selectedPinLength;
+                    
+                    _setupPin1 = string.Empty;
+                    _setupPin2 = string.Empty;
+                    InitSetupPinDots();
                 }
                 else
                 {
+                    SetupPasswordArea.Visibility = Visibility.Visible;
+                    SetupPinArea.Visibility = Visibility.Collapsed;
+                    
                     Step3Title.Text = L("Str_MasterPasswordSet", "Master Şifre Belirle");
                     Step3Description.Text = L("Str_MasterPasswordSetDesc", "Bu şifreyi her kilitli uygulamayı açmak için kullanacaksın.");
                     SetupPasswordBox1.MaxLength = 64;
                     SetupPasswordBox2.MaxLength = 64;
+                    SetupPasswordBox1.Clear();
+                    SetupPasswordBox2.Clear();
+                    SetupPasswordBox1.Focus();
                 }
-                SetupPasswordBox1.Focus();
                 break;
 
             case 4:
@@ -281,12 +297,14 @@ public partial class SetupWizard : Window
     /// </summary>
     private void CompleteSetup()
     {
+        string finalPassword = _selectedAuthMethod == AuthMethod.Pin ? _setupPin1 : SetupPasswordBox1.Password;
+
         var settings = new AppSettings
         {
             Language = RadioLangTR.IsChecked == true ? "tr" : "en",
             AuthMethod = _selectedAuthMethod,
             PinLength = _selectedPinLength,
-            MasterPasswordHash = PasswordHasher.Hash(SetupPasswordBox1.Password),
+            MasterPasswordHash = PasswordHasher.Hash(finalPassword),
             RecoveryKeyHash = RecoveryManager.HashRecoveryKey(_generatedRecoveryKey),
             SetupCompleted = true
         };
@@ -305,5 +323,82 @@ public partial class SetupWizard : Window
         var mainWindow = new MainWindow();
         mainWindow.Show();
         Close();
+    }
+
+    // ═══════════════════════════════════════
+    // Yeni Kurulum Numpad Yönetimi
+    // ═══════════════════════════════════════
+
+    private void InitSetupPinDots()
+    {
+        SetupPin1DotsPanel.Children.Clear();
+        SetupPin2DotsPanel.Children.Clear();
+        for (var i = 0; i < 4; i++) // Strict 4
+        {
+            SetupPin1DotsPanel.Children.Add(CreateDot());
+            SetupPin2DotsPanel.Children.Add(CreateDot());
+        }
+    }
+
+    private Ellipse CreateDot()
+    {
+        return new Ellipse
+        {
+            Width = 14, Height = 14,
+            Margin = new Thickness(6, 0, 6, 0),
+            Fill = (Brush)FindResource("BrushBackgroundLight"),
+            Stroke = (Brush)FindResource("BrushBorderDefault"),
+            StrokeThickness = 1
+        };
+    }
+
+    private void UpdateSetupPinDots()
+    {
+        for (var i = 0; i < 4; i++)
+        {
+            if (SetupPin1DotsPanel.Children[i] is Ellipse dot1)
+                dot1.Fill = i < _setupPin1.Length ? (Brush)FindResource("BrushAccentPrimary") : (Brush)FindResource("BrushBackgroundLight");
+
+            if (SetupPin2DotsPanel.Children[i] is Ellipse dot2)
+                dot2.Fill = i < _setupPin2.Length ? (Brush)FindResource("BrushAccentPrimary") : (Brush)FindResource("BrushBackgroundLight");
+        }
+    }
+
+    private void SetupNumpad_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button btn)
+        {
+            string val = btn.Content.ToString() ?? "";
+            SetupPasswordError.Text = "";
+
+            if (_setupPin1.Length < _selectedPinLength)
+            {
+                _setupPin1 += val;
+            }
+            else if (_setupPin2.Length < _selectedPinLength)
+            {
+                _setupPin2 += val;
+                if (_setupPin2.Length == _selectedPinLength && _setupPin1 != _setupPin2)
+                {
+                    SetupPasswordError.Text = L("Str_PasswordMismatch", "Şifreler eşleşmiyor.");
+                }
+            }
+            UpdateSetupPinDots();
+        }
+    }
+
+    private void SetupNumpadBackspace_Click(object sender, RoutedEventArgs e)
+    {
+        SetupPasswordError.Text = "";
+        
+        if (_setupPin2.Length > 0)
+        {
+            _setupPin2 = _setupPin2[..^1];
+        }
+        else if (_setupPin1.Length > 0)
+        {
+            _setupPin1 = _setupPin1[..^1];
+        }
+        UpdateSetupPinDots();
     }
 }

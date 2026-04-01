@@ -19,6 +19,8 @@ public partial class App : Application
     private WindowObserverService? _windowObserver;
     private GlobalHotkeyService? _hotkeyService;
 
+    public bool IsExiting { get; set; } = false;
+
     /// <summary>
     /// ResourceDictionary'den lokalize metin çeker.
     /// </summary>
@@ -30,7 +32,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         // UI'ın şifre ekranını gecikmesiz açması için işlemci önceliğini yükseltiyoruz
-        System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+        try { System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High; } catch { }
 
         // Tek instance kontrolü — aynı anda birden fazla WinAppLock UI açılmasını engeller
         const string MUTEX_NAME = "WinAppLock_UI_SingleInstance";
@@ -54,6 +56,11 @@ public partial class App : Application
 
         base.OnStartup(e);
 
+        bool isHidden = e.Args.Contains("--hidden");
+
+        // Service.exe kontrolü
+        EnsureServiceIsRunning();
+
         // Ayarları yükle ve dili ayarla
         var database = new AppDatabase();
         var settings = database.GetSettings();
@@ -72,8 +79,42 @@ public partial class App : Application
         {
             // Dashboard'u aç ve servisleri başlat
             var mainWindow = new MainWindow();
-            mainWindow.Show();
+            if (!isHidden)
+            {
+                mainWindow.Show();
+            }
             InitializeServices(mainWindow);
+        }
+    }
+
+    /// <summary>
+    /// Servisin arka planda çalışıp çalışmadığını denetler, kapalıysa başlatır.
+    /// </summary>
+    private void EnsureServiceIsRunning()
+    {
+        try
+        {
+            // Zaten çalışıyorsa geç
+            var processes = System.Diagnostics.Process.GetProcessesByName("WinAppLock.Service");
+            if (processes.Length > 0) return;
+
+            // Çalışmıyorsa, EXE'yi bul ve başlat
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            var servicePath = System.IO.Path.Combine(basePath, "WinAppLock.Service.exe");
+
+            if (System.IO.File.Exists(servicePath))
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = servicePath,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Service başlatılamadı: {ex.Message}");
         }
     }
 
@@ -94,12 +135,9 @@ public partial class App : Application
         };
         _trayService.ExitRequested += () =>
         {
+            IsExiting = true;
             _trayService.Dispose();
             Current.Shutdown();
-        };
-        _trayService.LockAllRequested += () =>
-        {
-            _pipeClient?.SendLockAll();
         };
 
         // ─── Named Pipe İstemcisi ───
@@ -147,45 +185,73 @@ public partial class App : Application
         });
     }
 
+    private LockOverlay? _currentOverlay;
+
     /// <summary>
     /// Kilitli uygulama algılandığında LockOverlay'i gösterir.
     /// </summary>
     private void ShowLockOverlay(PipeMessage message)
     {
-        var database = new AppDatabase();
-
-        // Uygulama ikonunu ve özel şifre hash'ini bul
-        string? iconBase64 = null;
-        string? customPasswordHash = null;
-
-        var apps = database.GetAllLockedApps();
-        var matchedApp = apps.FirstOrDefault(a =>
-            a.Identity.ExecutableName.Equals(
-                message.AppName, StringComparison.OrdinalIgnoreCase));
-
-        if (matchedApp != null)
+        try
         {
-            iconBase64 = matchedApp.IconBase64;
-            customPasswordHash = matchedApp.CustomPasswordHash;
+            // Eğer halihazırda bir overlay açıksa, yenisini açma (veya mevcut olanı güncelle?)
+            // Şimdilik sadece bir tane gösteriyoruz ki sistem kilitlenmesin.
+            if (_currentOverlay != null && _currentOverlay.IsVisible)
+            {
+                return;
+            }
+
+            var database = new AppDatabase();
+
+            // Uygulama ikonunu ve özel şifre hash'ini bul
+            string? iconBase64 = null;
+            string? customPasswordHash = null;
+
+            var apps = database.GetAllLockedApps();
+            var matchedApp = apps.FirstOrDefault(a =>
+                a.Identity.ExecutableName.Equals(
+                    message.AppName, StringComparison.OrdinalIgnoreCase));
+
+            if (matchedApp != null)
+            {
+                iconBase64 = matchedApp.IconBase64;
+                customPasswordHash = matchedApp.CustomPasswordHash;
+            }
+
+            _currentOverlay = new LockOverlay();
+
+            _currentOverlay.AuthSuccess += processId =>
+            {
+                _pipeClient?.SendAuthSuccess(processId, message.AppName);
+                _currentOverlay = null;
+            };
+            
+            _currentOverlay.AuthCancelled += processId =>
+            {
+                _pipeClient?.SendAuthCancelled(processId);
+                _currentOverlay = null;
+            };
+
+            // Kapanma durumunda referansı temizle
+            _currentOverlay.Closed += (s, e) => { _currentOverlay = null; };
+
+            _currentOverlay.ShowForProcess(
+                message.ProcessId,
+                message.AppName ?? L("Str_UnknownApp", "Bilinmeyen Uygulama"),
+                iconBase64,
+                customPasswordHash);
+
+            // Pencereyi öne getir ve odakla
+            _currentOverlay.Activate();
+            _currentOverlay.Focus();
         }
-
-        var overlay = new LockOverlay();
-
-        overlay.AuthSuccess += processId =>
+        catch (Exception ex)
         {
-            _pipeClient?.SendAuthSuccess(processId, message.AppName);
-        };
-        
-        overlay.AuthCancelled += processId =>
-        {
-            _pipeClient?.SendAuthCancelled(processId);
-        };
-
-        overlay.ShowForProcess(
-            message.ProcessId,
-            message.AppName ?? L("Str_UnknownApp", "Bilinmeyen Uygulama"),
-            iconBase64,
-            customPasswordHash);
+            MessageBox.Show($"Şifre Ekranı Yüklenirken Hata Oluştu!\n\nSebeb: {ex.Message}\nHata Türü: {ex.GetType().FullName}", 
+                "WinAppLock UI Debug", MessageBoxButton.OK, MessageBoxImage.Error);
+                
+            System.Diagnostics.Debug.WriteLine($"LockOverlay hatası: {ex.Message}");
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

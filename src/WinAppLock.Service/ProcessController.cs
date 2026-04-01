@@ -174,4 +174,32 @@ public static class ProcessController
             return false;
         }
     }
+
+    /// <summary>
+    /// İsmi verilen çalıştırılabilir dosyaya (extension dahil veya hariç) ait tüm çalışan processleri getirir.
+    /// </summary>
+    public static List<Process> GetProcessesByName(string exeName)
+    {
+        var list = new List<Process>();
+        try
+        {
+            var nameWithoutExt = Path.GetFileNameWithoutExtension(exeName);
+            list.AddRange(Process.GetProcessesByName(nameWithoutExt));
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "[ProcessController] GetProcessesByName hatası: {ExeName}", exeName);
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// Verilen process ID ve onun çocuk process'lerini (suspend) duraklatır.
+    /// Zamanlı kilitleme için kullanılır.
+    /// </summary>
+    public static void SuspendTree(int rootProcessId)
+    {
+        SuspendProcess(rootProcessId);
+        // İstenirse WMI veya Toolhelp32Snapshot ile alt processleri de durdurabiliriz
+    }
 }

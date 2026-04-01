@@ -82,20 +82,20 @@
     <!-- ─── Tam Ekran Karartma Arkaplanı ─── -->
     <Grid x:Name="OverlayBackground" Opacity="0">
         <Grid.Background>
-            <SolidColorBrush Color="#000000" Opacity="0.85" />
+            <SolidColorBrush Color="#000000" Opacity="0.90" />
         </Grid.Background>
 
         <!-- ─── Merkez Auth Kartı ─── -->
         <Border x:Name="AuthCardBorder"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Width="380"
+                Width="400"
                 Background="{StaticResource BrushBackgroundCard}"
                 BorderBrush="{StaticResource BrushBorderDefault}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource RadiusXLarge}"
+                BorderThickness="0"
+                CornerRadius="{StaticResource RadiusLarge}"
                 Padding="32"
-                Effect="{StaticResource ShadowLarge}"
+                Effect="{StaticResource ShadowMedium}"
                 RenderTransformOrigin="0.5,0.5">
             <Border.RenderTransform>
                 <TransformGroup>
@@ -236,14 +236,9 @@
                 <Button x:Name="BtnCancel"
                         Content="İptal Et (ESC)"
                         Click="BtnCancel_Click"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Foreground="{StaticResource BrushTextMuted}"
-                        FontFamily="{StaticResource FontPrimary}"
-                        FontSize="{StaticResource FontSizeS}"
+                        Style="{StaticResource BtnGhost}"
                         HorizontalAlignment="Center"
-                        Margin="0,16,0,0"
-                        Cursor="Hand" />
+                        Margin="0,24,0,0" />
             </StackPanel>
         </Border>
     </Grid>

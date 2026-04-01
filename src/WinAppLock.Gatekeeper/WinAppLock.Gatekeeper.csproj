@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>WinAppLock.Gatekeeper</RootNamespace>
     <AssemblyName>WinAppLock.Gatekeeper</AssemblyName>
-    <Version>0.0.104</Version>
-    <!-- Gatekeeper penceresiz çalışır, konsol penceresi de gizlenecek -->
+    <Version>0.0.106</Version>
+    <!-- Gatekeeper penceresiz çalışır, WinExe ile konsol penceresi çıkması engellendi -->
     <DisableWinExeManifest>false</DisableWinExeManifest>
   </PropertyGroup>
 
